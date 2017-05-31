@@ -8,24 +8,27 @@ using WaterUseServices;
 
 namespace WaterUseServices.XUnitTest
 {
-    public class EndpointTest
+    public class IntegrationTest
     {
         private readonly TestServer _server;
         private readonly HttpClient _client;
-        public EndpointTest()
+        public IntegrationTest()
         {
             // Arrange
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<Startup>());
             _client = _server.CreateClient();
+            _client.BaseAddress = new Uri("http://localhost");
         }
 
         [Fact]
-        public async Task Test1()
+        public async Task Roles()
         {
             //Act
             var response = await _client.GetAsync("/wateruse/roles");
             response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            Assert.True(responseString.Contains("name"));
         }
     }
 }

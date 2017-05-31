@@ -17,7 +17,6 @@
 //              
 //
 // 
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -28,11 +27,11 @@ using System.Threading.Tasks;
 namespace WaterUseServices.Controllers
 {
     [Route("wateruse/[controller]")]
-    public class CatagoriesController : Controller
+    public class SourceTypesController : Controller
     {
         private IWaterUseAgent agent;
 
-        public CatagoriesController(IWaterUseAgent sa)
+        public SourceTypesController(IWaterUseAgent sa)
         {
             this.agent = sa;
         }
@@ -42,14 +41,14 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                return Ok(agent.Select<CatagoryType>());
+                return Ok(agent.Select<SourceType>());
             }
             catch (Exception)
             {
 
                 throw;
             }
-
+            
         }
         
         [HttpGet("{id}")]
@@ -59,42 +58,42 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<CatagoryType>(id));
+                return Ok(agent.Find<SourceType>(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Post([FromBody]SourceType entity)
+        {
+            try
+            {
+                if (!isValid(entity)) return new BadRequestResult();
+                return Ok(agent.Add<SourceType>(entity));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+     
+        [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Put(int id, [FromBody]SourceType entity)
+        {
+            try
+            {
+                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                return Ok(agent.Update<SourceType>(id, entity));
             }
             catch (Exception)
             {
 
                 throw;
             }
-        }
-        
-        [HttpPost][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Post([FromBody]CatagoryType entity)
-        {
-            try
-            {
-                if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Add<CatagoryType>(entity));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        
-        [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Put(int id, [FromBody]CatagoryType entity)
-        {
-            try
-            {
-                if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<CatagoryType>(id, entity));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-           
+
         }
         
         [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
@@ -102,23 +101,23 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<CatagoryType>(id);
-                if (entity == null) return new BadRequestResult();
 
-                agent.Delete<CatagoryType>(entity);
+                if (id < 1) return new BadRequestResult();
+                var entity = agent.Find<SourceType>(id);
+                if (entity == null) return new BadRequestResult();
+                agent.Delete<SourceType>(entity);
 
                 return Ok();
-
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(CatagoryType item)
+        private Boolean isValid(SourceType item)
         {
             try
             {

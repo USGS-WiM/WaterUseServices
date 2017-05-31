@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using WaterUseServices.Data;
+using WaterUseAgent;
 using WiM.Security;
 
 
@@ -35,13 +35,12 @@ namespace WaterUseServices.Security.Authentication.Basic
 {
     internal class BasicAuthenticationHandler : AuthenticationHandler<BasicAuthenticationOptions>
     {
-        private WaterUseServiceAgent _agent;
-        public BasicAuthenticationHandler(WaterUseServiceAgent agent) {
+        private IWaterUseAgent _agent;
+        public BasicAuthenticationHandler(IWaterUseAgent agent) {
             this._agent = agent;
         }
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            AuthenticateResult result = null;
             try
             {
                 string authorization = Request.Headers["Authorization"];

@@ -22,37 +22,56 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using WaterUseDB.Resources;
+using WaterUseAgent;
+using System.Threading.Tasks;
 
 namespace WaterUseServices.Controllers
 {
     [Route("wateruse/[controller]")]
     public class UnitsController : Controller
     {
-        private WaterUseServices.Data.WaterUseServiceAgent agent;
+        private IWaterUseAgent agent;
 
-        public UnitsController(WaterUseServices.Data.WaterUseServiceAgent sa) {
+        public UnitsController(IWaterUseAgent sa) {
             this.agent = sa;
         }
 
+        #region METHOD
         [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(agent.Select<UnitType>());        
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if(id<0) return new BadRequestResult(); // This returns HTTP 404
-
-            return Ok(agent.Find<UnitType>(id));
-        }
-        
-        [HttpPost][Authorize(Policy = "Restricted")]
-        public IActionResult Post([FromBody]UnitType entity)
+        public async Task<IActionResult> Get()
         {
             try
             {
+                return Ok(agent.Select<UnitType>());  
+            }
+            catch (Exception)
+            {
+                throw;
+            }      
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                if(id<0) return new BadRequestResult(); // This returns HTTP 404
+
+                return Ok(agent.Find<UnitType>(id));
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        
+        [HttpPost][Authorize(Policy = "Restricted")]
+        public async Task<IActionResult> Post([FromBody]UnitType entity)
+        {
+            try
+            {
+                 if (!isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(agent.Add<UnitType>(entity));
             }
             catch (Exception)
@@ -62,17 +81,51 @@ namespace WaterUseServices.Controllers
         }
         
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public IActionResult Put(int id, [FromBody]UnitType entity)
+        public async Task<IActionResult> Put(int id, [FromBody]UnitType entity)
         {
-            return Ok(agent.Update<UnitType>(id,entity));
-        }
-        
+            try
+            {
+                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                return Ok(agent.Update<UnitType>(id,entity));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }        
         [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var role = agent.Find<UnitType>(id);
-            if(role != null)
-                agent.Delete<UnitType>(role);
+            try
+            {
+
+                if (id < 1) return new BadRequestResult();
+                var entity = agent.Find<UnitType>(id);
+                if (entity == null) return new BadRequestResult();
+                agent.Delete<UnitType>(entity);
+
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
+        #endregion
+        #region HELPER METHODS
+        private Boolean isValid(UnitType item)
+        {
+            try
+            {
+                return string.IsNullOrEmpty(item.Name);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
     }
 }

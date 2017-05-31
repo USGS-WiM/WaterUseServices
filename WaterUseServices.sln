@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaterUseDB.Test", "WaterUse
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaterUseServices.XUnitTest", "WaterUseServices.XUnitTest\WaterUseServices.XUnitTest.csproj", "{668FD628-DB14-40A8-8ABC-C281A0F7C964}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaterUseAgent", "WaterUseAgent\WaterUseAgent.csproj", "{9C566B19-1349-42EE-9974-9DC2526ECF92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{668FD628-DB14-40A8-8ABC-C281A0F7C964}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{668FD628-DB14-40A8-8ABC-C281A0F7C964}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{668FD628-DB14-40A8-8ABC-C281A0F7C964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C566B19-1349-42EE-9974-9DC2526ECF92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C566B19-1349-42EE-9974-9DC2526ECF92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C566B19-1349-42EE-9974-9DC2526ECF92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C566B19-1349-42EE-9974-9DC2526ECF92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
