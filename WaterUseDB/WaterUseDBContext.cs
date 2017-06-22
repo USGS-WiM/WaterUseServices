@@ -70,8 +70,8 @@ namespace WaterUseDB
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            #warning Add connectionstring for migrations
-            //optionsBuilder.UseNpgsql("connectionstring");
+#warning Add connectionstring for migrations
+            //optionsBuilder.UseNpgsql(connectionstring);
         }
     }
 }

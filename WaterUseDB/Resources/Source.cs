@@ -28,12 +28,16 @@ namespace WaterUseDB.Resources
     {
         [Required]
         public int ID { get; set; }
+
         public string Name { get; set; }
         [Required]
         public string FacilityName { get; set; }
-        public string StationID { get; set; }
         [Required]
-        public int CatagoryTypeID { get; set; }
+        public string FacilityCode{ get; set; }
+
+        public string StationID { get; set; }
+
+        public int? CatagoryTypeID { get; set; }
         [Required]
         public int SourceTypeID { get; set; }
         [Required]

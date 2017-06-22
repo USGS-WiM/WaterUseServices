@@ -25,15 +25,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
-using WaterUseServices.Data;
+using WaterUseAgent;
 
 namespace WaterUseServices.Security.Authentication.Basic
 {
     public class BasicAuthenticationMiddleware : AuthenticationMiddleware<BasicAuthenticationOptions>
     {
-        private WaterUseServiceAgent _agent;
+        private IWaterUseAgent _agent;
         public BasicAuthenticationMiddleware(RequestDelegate next, IOptions<BasicAuthenticationOptions> options, 
-            ILoggerFactory loggerFactory, UrlEncoder encoder,WaterUseServiceAgent agent) : base(next, options, loggerFactory, encoder)
+            ILoggerFactory loggerFactory, UrlEncoder encoder,IWaterUseAgent agent) : base(next, options, loggerFactory, encoder)
         {
             this._agent = agent;
         }

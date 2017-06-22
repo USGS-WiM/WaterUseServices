@@ -22,38 +22,58 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using WaterUseDB.Resources;
+using WaterUseAgent;
+using System.Threading.Tasks;
 
 namespace WaterUseServices.Controllers
 {
     [Route("wateruse/[controller]")]
     public class CatagoriesController : Controller
     {
-        private WaterUseServices.Data.WaterUseServiceAgent agent;
+        private IWaterUseAgent agent;
 
-        public CatagoriesController(WaterUseServices.Data.WaterUseServiceAgent sa)
+        public CatagoriesController(IWaterUseAgent sa)
         {
             this.agent = sa;
         }
-        
+        #region METHODS
         [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(agent.Select<CatagoryType>());
-        }
-        
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id < 0) return new BadRequestResult(); // This returns HTTP 404
-
-            return Ok(agent.Find<CatagoryType>(id));
-        }
-        
-        [HttpPost][Authorize(Policy = "AdminOnly")]
-        public IActionResult Post([FromBody]CatagoryType entity)
+        public async Task<IActionResult> Get()
         {
             try
             {
+                return Ok(agent.Select<CatagoryType>());
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+        
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                if (id < 0) return new BadRequestResult(); // This returns HTTP 404
+
+                return Ok(agent.Find<CatagoryType>(id));
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Post([FromBody]CatagoryType entity)
+        {
+            try
+            {
+                if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(agent.Add<CatagoryType>(entity));
             }
             catch (Exception)
@@ -63,17 +83,52 @@ namespace WaterUseServices.Controllers
         }
         
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public IActionResult Put(int id, [FromBody]CatagoryType entity)
+        public async Task<IActionResult> Put(int id, [FromBody]CatagoryType entity)
         {
-            return Ok(agent.Update<CatagoryType>(id, entity));
+            try
+            {
+                if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                return Ok(agent.Update<CatagoryType>(id, entity));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+           
         }
         
         [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var entity = agent.Find<CatagoryType>(id);
-            if (entity != null)
+            try
+            {
+                if (id < 1) return new BadRequestResult();
+                var entity = agent.Find<CatagoryType>(id);
+                if (entity == null) return new BadRequestResult();
+
                 agent.Delete<CatagoryType>(entity);
+
+                return Ok();
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
+        #endregion
+        #region HELPER METHODS
+        private Boolean isValid(CatagoryType item)
+        {
+            try
+            {
+                return string.IsNullOrEmpty(item.Name);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
     }
 }

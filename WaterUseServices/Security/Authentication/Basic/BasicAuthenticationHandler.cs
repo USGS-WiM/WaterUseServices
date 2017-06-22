@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using WaterUseServices.Data;
+using WaterUseAgent;
 using WiM.Security;
 
 
@@ -35,13 +35,12 @@ namespace WaterUseServices.Security.Authentication.Basic
 {
     internal class BasicAuthenticationHandler : AuthenticationHandler<BasicAuthenticationOptions>
     {
-        private WaterUseServiceAgent _agent;
-        public BasicAuthenticationHandler(WaterUseServiceAgent agent) {
+        private IWaterUseAgent _agent;
+        public BasicAuthenticationHandler(IWaterUseAgent agent) {
             this._agent = agent;
         }
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            AuthenticateResult result = null;
             try
             {
                 string authorization = Request.Headers["Authorization"];
@@ -72,9 +71,11 @@ namespace WaterUseServices.Security.Authentication.Basic
                 //set the user
                 var claims = new List<Claim> {
                             new Claim(ClaimTypes.Name, manager.FirstName, ClaimValueTypes.String),
-                            new Claim(ClaimTypes.Surname, manager.FirstName, ClaimValueTypes.String),
+                            new Claim(ClaimTypes.Surname, manager.LastName, ClaimValueTypes.String),
                             new Claim(ClaimTypes.Email, manager.Email, ClaimValueTypes.String),
-                            new Claim(ClaimTypes.Role, manager.Role.Name, ClaimValueTypes.String)
+                            new Claim(ClaimTypes.Role, manager.Role.Name, ClaimValueTypes.String),
+                            new Claim(ClaimTypes.PrimarySid, manager.ID.ToString(), ClaimValueTypes.Integer),
+                            new Claim(ClaimTypes.NameIdentifier, manager.Username,ClaimValueTypes.String)
                         };
                 var userIdentity = new ClaimsIdentity(claims, Options.AuthenticationScheme);
                 var userprincipal = new ClaimsPrincipal(userIdentity);               

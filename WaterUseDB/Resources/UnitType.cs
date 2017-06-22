@@ -19,13 +19,17 @@
 //   
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
     public class UnitType
     {
+        [Required]
         public int ID { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public string Abbreviation { get; set; }
 
         List<Permit> Permits { get; set; }

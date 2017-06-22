@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using WaterUseDB;
-using WaterUseServices.Data;
+using WaterUseAgent;
 using WaterUseServices.Security.Authentication.Basic;
 
 namespace WaterUseServices
@@ -40,7 +40,7 @@ namespace WaterUseServices
                                                             .GetConnectionString("WaterUseConnection"),Configuration["dbuser"], Configuration["dbpassword"], Configuration["dbHost"]))
                                                             .EnableSensitiveDataLogging());
 
-            services.AddScoped<WaterUseServiceAgent>();
+            services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();
             services.AddAuthorization(options =>loadAutorizationPolicies(options));
             services.AddMvc();            
         }       
