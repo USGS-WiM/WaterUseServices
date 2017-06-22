@@ -41,10 +41,9 @@ namespace WaterUseAgent
         IQueryable<Role> GetRoles();
         Manager GetManagerByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
-        Wateruse GetWateruse(string basin, Int32 startyear, Int32? endyear);
-
-
-
+        Wateruse GetWateruse(object basin, Int32 startyear, Int32? endyear);
+        IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, Int32 startyear, Int32? endyear);
+        IDictionary<string,Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear);
     }
     public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent
     {
@@ -75,39 +74,7 @@ namespace WaterUseAgent
         {
             base.Delete<T>(item);
         }
-        public Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear)
-        {
-            IQueryable<Source> equery = null;
-            try
-            {
-                if (sources == null && sources.Count() <= 0) return null;
 
-                equery = equery.Where(s => sources.Contains(s.ID.ToString().Trim())
-                                            || sources.Contains(s.FacilityName.ToLower().Trim()));
-
-                equery.Include("TimeSeries.UnitType").Include(s=>s.SourceType).Include(s=>s.CatagoryType);
-
-                return (getAggregatedWaterUse(equery, startyear, endyear));
-               
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        public Wateruse GetWateruse(string basin, Int32 startyear, Int32? endyear)
-        {
-            try
-            {
-                //POSTGIS method that returns list of Sources
-                List<string> sources = null;
-                return GetWateruse(sources, startyear, endyear);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
         #endregion
         #region Roles
         public IQueryable<Role> GetRoles() {
@@ -135,19 +102,171 @@ namespace WaterUseAgent
 
         }
         #endregion
-
-        #region HELPER METHODS
-        private Wateruse getAggregatedWaterUse(IEnumerable<Source> list, Int32 startyear, Int32? endyear)
+        #region Summary
+        public Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear)
         {
+            IQueryable<Source> equery = null;
+            int parsed = 0;
             try
             {
+                if (sources == null && sources.Count() <= 0) return null;
+                IEnumerable<int> ids = sources.Where(x => int.TryParse(x, out parsed)).Select(x => parsed);
+
+                equery = FromSQL<Source>(String.Format(getSQLStatement(sqlTypes.e_source),
+                                                        ids.Count() < 1 ? "-999" : String.Join("','", ids),
+                                                        String.Join("','", sources)));
+
+                var result = getAggregatedWaterUse(equery, startyear, endyear);
+                return (result);
+
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error aggregating Wateruse " + ex.Message);
+                return null;
+            }
+        }
+        public Wateruse GetWateruse(object basin, Int32 startyear, Int32? endyear)
+        {
+            IQueryable<Source> equery = null;
+            try
+            {
+                equery = FromSQL<Source>(String.Format(getSQLStatement(sqlTypes.e_sourcebygeojson), basin, 4326));
+
+                var result = getAggregatedWaterUse(equery, startyear, endyear);
+                return (result);
+
+
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error aggregating Wateruse " + ex.Message);
+                return null;
+            }
+        }
+        public IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, Int32 startyear, Int32? endyear)
+        {
+            IQueryable<Source> equery = null;
+            int parsed = 0;
+            try
+            {
+                if (sources == null && sources.Count() <= 0) return null;
+                IEnumerable<int> ids = sources.Where(x => int.TryParse(x, out parsed)).Select(x => parsed);
+
+                equery = FromSQL<Source>(String.Format(getSQLStatement(sqlTypes.e_source),
+                                                        ids.Count() < 1 ? "-999" : String.Join("','", ids),
+                                                        String.Join("','", sources)));
+
+                return getAggregatedWaterUseBySource(equery, startyear, endyear);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public IDictionary<string, Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear)
+        {
+            IQueryable<Source> equery = null;
+            try
+            {
+                equery = FromSQL<Source>(String.Format(getSQLStatement(sqlTypes.e_sourcebygeojson), basin, 4326));
+
+                return getAggregatedWaterUseBySource(equery, startyear, endyear);
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error aggregating Wateruse " + ex.Message);
+                return null;
+            }
+        }
+        #endregion
+        #region HELPER METHODS
+
+        private Wateruse getAggregatedWaterUse(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
+        {
+            List<Source> sourceList = null;
+            try
+            {
+                sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
                 return new Wateruse()
-                {
+                {                    
                     ProcessDate = DateTime.Now,
                     StartYear = startyear,
                     EndYear = endyear,
-                    Return = getWaterUseSummary(list.Where(s => s.CatagoryType.Code == "SW"), startyear, endyear),
-                    Withdrawal = getWaterUseSummary(list.Where(s => s.CatagoryType.Code == "GW"), startyear, endyear)
+                    Return = getWaterUseSummary(sourceList.Where(s => s.SourceType.Code == "SW").ToList(), startyear, endyear),
+                    Withdrawal = getWaterUseSummary(sourceList.Where(s => s.SourceType.Code == "GW").ToList(), startyear, endyear)
+                };
+            }   
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        private IDictionary<string, Wateruse> getAggregatedWaterUseBySource(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
+        {
+            List<Source> sourceList = null;
+            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
+            try
+            {
+                sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
+                foreach (var item in sourceList)
+                {
+                    var wu = getWaterUseSummary(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear);
+                    result.Add(item.FacilityCode, new Wateruse()
+                    {
+                        ProcessDate = DateTime.Now,
+                        StartYear = startyear,
+                        EndYear = endyear,
+                        Return = item.SourceType.Code =="SW"?wu:null,
+                        Withdrawal = item.SourceType.Code == "GW" ? wu : null,
+                    });
+
+                }//next item
+                return result; 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        private WateruseSummary getWaterUseSummary(IList<Source> sources, Int32 startyear, Int32? endyear)
+        {
+            List<TimeSeries> tslist = null;
+            Int32 yrspan = 1;
+            try
+            {
+                if (!endyear.HasValue) endyear = startyear;
+                yrspan = (endyear.Value + 1) - startyear;
+
+                tslist = sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value).ToList();
+                if (tslist.Count < 1) return null;
+                return new WateruseSummary() {
+                    Annual = new WateruseValue() {
+                        Name = tslist.First().Source.SourceType.Name,
+                        Description = "Daily Annual Average " + tslist.First().Source.SourceType.Description,
+                        Value = tslist.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year)),
+                        Unit = tslist.First().UnitType
+                    },
+                    Monthly = tslist.GroupBy(ts => ts.Date.Month)
+                    .ToDictionary(ky => ky.Key, mval => new MonthlySummary()
+                    {
+                        Month = new WateruseValue() {
+                            Name = mval.First().Date.ToString("MMM", CultureInfo.InvariantCulture),
+                            Description = mval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " daily monthly average",
+                            Unit = mval.First().UnitType,
+                            Value = mval.Sum(ts => ts.Value / yrspan)
+                        },
+                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.GroupBy(cd => cd.Source.CatagoryType.Code)
+                        .ToDictionary(ky => ky.Key, cval => new WateruseValue()
+                        {
+                            Name = cval.First().Source.CatagoryType.Name,
+                            Description = "Daily " + cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " average " + cval.First().Source.CatagoryType.Name,
+                            Unit = cval.First().UnitType,
+                            Value = cval.Sum(ts => ts.Value / yrspan)
+                        }) : null
+                    })
+                     
                 };
             }
             catch (Exception)
@@ -156,45 +275,15 @@ namespace WaterUseAgent
             }
         }
 
-        private WateruseSummary getWaterUseSummary(IEnumerable<Source> sources, Int32 startyear, Int32? endyear)
+        private IDictionary<string, Wateruse> getWateruseBySource(IList<Source> sources, int startyear, int? endyear)
         {
-            IQueryable<TimeSeries> query = null;
-            Int32 yrspan = 1;
-            try
-            {
-                if (endyear.HasValue) yrspan = (endyear.Value + 1) - startyear;
+            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
 
-
-                query = sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value).AsQueryable();
-
-                return new WateruseSummary() {
-                    Annual = new WateruseValue() {
-                        Description = "Daily Annual Average "+ query.First().Source.SourceType.Description,
-                        Value = query.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year)),
-                        Unit = query.First().UnitType
-                    },
-                    Monthly = query.GroupBy(ts => ts.Date.Month)
-                    .ToDictionary(ky => ky.Key, mval => new MonthlySummary()
-                    {
-                        Month = new WateruseValue() {
-                            Description = mval.First().Date.Month.ToString("MMM", CultureInfo.InvariantCulture),
-                            Unit = mval.First().UnitType,
-                            Value = mval.Sum(ts => ts.Value/yrspan)
-                        },
-                        Code = mval.GroupBy(cd=>cd.Source.CatagoryType.Code)
-                        .ToDictionary(ky=>ky.Key, cval=> new WateruseValue()
-                        {
-                            Description = "Daily " + cval.First().Date.Month.ToString("MMM", CultureInfo.InvariantCulture) +" average "+cval.First().Source.CatagoryType.Description,
-                            Unit = cval.First().UnitType,
-                            Value = cval.Sum(ts=>ts.Value/yrspan)
-                        })
-                    })
-                };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            foreach (var item in sources)
+            { 
+                result.Add(item.FacilityCode, getAggregatedWaterUse(sources.Where(i => i.Equals(item)).AsQueryable(), startyear, endyear));
+            }//next item
+            return result;
         }
 
         private int getDaysInYear(Int32 year)
@@ -205,7 +294,36 @@ namespace WaterUseAgent
             return (nextYear - thisYear).Days;
         }
 
+        private string getSQLStatement(sqlTypes type) {
 
+            switch (type)
+            {
+                case sqlTypes.e_sourcebygeojson:
+                    return @"select * from ""public"".""Sources""
+                                where ST_Within(
+                                    ""Location"",
+                                    st_transform(
+                                        st_setsrid(
+                                            ST_GeomFromGeoJSON('{{{0}}}'),
+                                        {1}),
+                                    4269))";
+                case sqlTypes.e_source:
+                    return @"SELECT * FROM ""public"".""Sources"" 
+                                WHERE ""ID"" IN ('{0}') OR 
+                                LOWER(""FacilityCode"") IN ('{1}')";
+
+
+                default:
+                    throw new Exception("No sql for table " + type);
+            }
+        }
+        #endregion
+        #region Enumerations
+        private enum sqlTypes
+        {
+            e_sourcebygeojson,
+            e_source
+        }
         #endregion
     }
 }

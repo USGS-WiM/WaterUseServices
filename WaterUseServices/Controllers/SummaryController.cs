@@ -38,51 +38,54 @@ namespace WaterUseServices.Controllers
         }
 
         #region METHOD
-        [HttpGet][Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Get([FromQuery]string sources, [FromQuery] Int32 startyear, [FromQuery]Int32 endyear)
-        {
-            List<string> sourcelist = null; 
-            try
-            {
-                sourcelist = parse(sources);
-                if (string.IsNullOrEmpty(sources) || startyear <1900 || sourcelist.Count < 1) return new BadRequestResult(); // This returns HTTP 404
-
-                return Ok(agent.GetWateruse(sourcelist, startyear, endyear));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        
-        [HttpGet]
-        public async Task<IActionResult> Getbybasin([FromBody] string basin, [FromQuery] Int32 startyear, [FromQuery]Int32 endyear)
+        [HttpPost][HttpGet]
+        public async Task<IActionResult> Get([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
         {
             try
             {
-                 if (string.IsNullOrEmpty(basin) || startyear < 1900) return new BadRequestResult(); // This returns HTTP 404
+                if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
+                if (!string.IsNullOrEmpty(sources))
+                {
+                    if (!User.Identity.IsAuthenticated) return new UnauthorizedResult();// return HTTP 401
+                    return Ok(agent.GetWateruse(parse(sources), startyear, endyear));
+                }//end if
+
+                if (basin == null) return new BadRequestResult(); //return HTTP 404
                 return Ok(agent.GetWateruse(basin, startyear, endyear));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
-            }            
+            }
         }
 
-        #endregion
-        #region HELPER METHODS
-        private Boolean isValid(UnitType item)
+        [HttpPost][HttpGet]
+        [Route("BySource")]
+        public async Task<IActionResult> BySource([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
         {
             try
             {
-                return string.IsNullOrEmpty(item.Name);
+                if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+
+                if (!string.IsNullOrEmpty(sources))
+                {
+                    if (!User.Identity.IsAuthenticated) return new UnauthorizedResult(); //return HTTP 404                   
+                    return Ok(agent.GetWaterusebySource(parse(sources), startyear, endyear));
+                }//end if
+
+                if (basin == null) return new BadRequestResult(); //return HTTP 401
+                return Ok(agent.GetWaterusebySource(basin, startyear, endyear));
             }
             catch (Exception)
             {
-                return false;
+                throw;
             }
         }
+                
+        #endregion
+        #region HELPER METHODS
+       
         #endregion
     }
 }

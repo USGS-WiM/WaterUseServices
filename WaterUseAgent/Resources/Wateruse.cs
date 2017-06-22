@@ -24,10 +24,11 @@ namespace WaterUseAgent.Resources
         public WateruseValue Month { get; set; }
         public IDictionary<string,WateruseValue> Code { get; set; }
         public bool ShouldSerializeCode()
-        { return Code != null && Code.Count > 1; }
+        { return Code != null && Code.Count > 0; }
     }
 
     public class WateruseValue {
+        public string Name { get; set; }
         public double Value { get; set; }
         public object Unit { get; set; }
         public string Description { get; set; }

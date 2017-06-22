@@ -104,21 +104,22 @@ namespace WaterUseDB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("EndDate");
+                    b.Property<DateTime?>("EndDate");
 
-                    b.Property<double>("IntakeCapacity");
+                    b.Property<double?>("IntakeCapacity");
 
-                    b.Property<string>("PermitNO");
+                    b.Property<string>("PermitNO")
+                        .IsRequired();
 
                     b.Property<int>("SourceID");
 
-                    b.Property<DateTime>("StartDate");
+                    b.Property<DateTime?>("StartDate");
 
-                    b.Property<int>("StatusTypeID");
+                    b.Property<int?>("StatusTypeID");
 
-                    b.Property<int>("UnitTypeID");
+                    b.Property<int?>("UnitTypeID");
 
-                    b.Property<double>("WellCapacity");
+                    b.Property<double?>("WellCapacity");
 
                     b.HasKey("ID");
 
@@ -187,7 +188,10 @@ namespace WaterUseDB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CatagoryTypeID");
+                    b.Property<int?>("CatagoryTypeID");
+
+                    b.Property<string>("FacilityCode")
+                        .IsRequired();
 
                     b.Property<string>("FacilityName")
                         .IsRequired();
@@ -239,11 +243,13 @@ namespace WaterUseDB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Code");
+                    b.Property<string>("Code")
+                        .IsRequired();
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
@@ -279,9 +285,11 @@ namespace WaterUseDB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Abbreviation");
+                    b.Property<string>("Abbreviation")
+                        .IsRequired();
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
@@ -320,13 +328,11 @@ namespace WaterUseDB.Migrations
 
                     b.HasOne("WaterUseDB.Resources.StatusType", "StatusType")
                         .WithMany()
-                        .HasForeignKey("StatusTypeID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("StatusTypeID");
 
                     b.HasOne("WaterUseDB.Resources.UnitType", "UnitType")
                         .WithMany()
-                        .HasForeignKey("UnitTypeID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UnitTypeID");
                 });
 
             modelBuilder.Entity("WaterUseDB.Resources.RegionManager", b =>
@@ -346,8 +352,7 @@ namespace WaterUseDB.Migrations
                 {
                     b.HasOne("WaterUseDB.Resources.CatagoryType", "CatagoryType")
                         .WithMany()
-                        .HasForeignKey("CatagoryTypeID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("CatagoryTypeID");
 
                     b.HasOne("WaterUseDB.Resources.Region", "Region")
                         .WithMany("Sources")

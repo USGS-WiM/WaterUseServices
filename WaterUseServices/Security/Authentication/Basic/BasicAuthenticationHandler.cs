@@ -71,9 +71,11 @@ namespace WaterUseServices.Security.Authentication.Basic
                 //set the user
                 var claims = new List<Claim> {
                             new Claim(ClaimTypes.Name, manager.FirstName, ClaimValueTypes.String),
-                            new Claim(ClaimTypes.Surname, manager.FirstName, ClaimValueTypes.String),
+                            new Claim(ClaimTypes.Surname, manager.LastName, ClaimValueTypes.String),
                             new Claim(ClaimTypes.Email, manager.Email, ClaimValueTypes.String),
-                            new Claim(ClaimTypes.Role, manager.Role.Name, ClaimValueTypes.String)
+                            new Claim(ClaimTypes.Role, manager.Role.Name, ClaimValueTypes.String),
+                            new Claim(ClaimTypes.PrimarySid, manager.ID.ToString(), ClaimValueTypes.Integer),
+                            new Claim(ClaimTypes.NameIdentifier, manager.Username,ClaimValueTypes.String)
                         };
                 var userIdentity = new ClaimsIdentity(claims, Options.AuthenticationScheme);
                 var userprincipal = new ClaimsPrincipal(userIdentity);               

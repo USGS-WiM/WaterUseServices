@@ -19,23 +19,27 @@
 //   
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
     public class Permit
     {
         public int ID { get; set; }
+        [Required]
         public int SourceID { get; set; }
+        [Required]
         public string PermitNO { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public Double WellCapacity { get; set; }
-        public Double IntakeCapacity { get; set; }
-        public int UnitTypeID { get; set; }
-        public int StatusTypeID { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public Double? WellCapacity { get; set; }
+        public Double? IntakeCapacity { get; set; }
+        public int? UnitTypeID { get; set; }
+        public int? StatusTypeID { get; set; }
        
         public Source Source { get; set; }
         public UnitType UnitType { get; set; }
+                
         public StatusType StatusType { get; set; }
     }
 }

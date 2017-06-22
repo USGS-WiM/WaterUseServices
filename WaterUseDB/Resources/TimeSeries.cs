@@ -19,15 +19,21 @@
 //   
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
     public class TimeSeries
     {
+        [Required]
         public int ID { get; set; }
+        [Required]
         public int SourceID { get; set; }
+        [Required]
         public DateTime Date { get; set; }
+        [Required]
         public double Value { get; set; }
+        [Required]
         public int UnitTypeID { get; set; }
 
         public Source Source { get; set; }
