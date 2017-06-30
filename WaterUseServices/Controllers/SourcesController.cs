@@ -23,11 +23,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class SourcesController : Controller
+    [Route("[controller]")]
+    public class SourcesController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -60,7 +61,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<Source>(id));
+                return Ok(await agent.Find<Source>(id));
             }
             catch (Exception)
             {
@@ -74,21 +75,37 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (!isValid(entity)) return new BadRequestResult();
-                return Ok(agent.Add<Source>(entity));
+                return Ok(await agent.Add<Source>(entity));
             }
             catch (Exception)
             {
                 throw;
             }
         }
-     
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<Source> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<Source>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Put(int id, [FromBody]Source entity)
         {
             try
             {
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<Source>(id, entity));
+                return Ok(await agent.Update<Source>(id, entity));
             }
             catch (Exception)
             {
@@ -105,9 +122,9 @@ namespace WaterUseServices.Controllers
             {
 
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<Source>(id);
+                var entity = await agent.Find<Source>(id);
                 if (entity == null) return new BadRequestResult();
-                agent.Delete<Source>(entity);
+                await agent.Delete<Source>(entity);
 
                 return Ok();
             }
@@ -119,17 +136,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(Source item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

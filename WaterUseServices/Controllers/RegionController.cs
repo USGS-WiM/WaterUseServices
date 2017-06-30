@@ -23,11 +23,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class RegionsController : Controller
+    [Route("[controller]")]
+    public class RegionsController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -58,7 +59,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<Region>(id));
+                return Ok(await agent.Find<Region>(id));
             }
             catch (Exception)
             {
@@ -66,27 +67,43 @@ namespace WaterUseServices.Controllers
             }
         }
         
-        [HttpPost][Authorize(Policy = "Restricted")]
+        [HttpPost][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Post([FromBody]Region entity)
         {
             try
             {
                 if (!isValid(entity)) return new BadRequestResult();
-                return Ok(agent.Add<Region>(entity));
+                return Ok(await agent.Add<Region>(entity));
             }
             catch (Exception)
             {
                 throw;
             }
         }
-     
-        [HttpPut("{id}")][Authorize(Policy = "CanModify")]
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<Region> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<Region>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]Region entity)
         {
             try
             {
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<Region>(id, entity));
+                return Ok(await agent.Update<Region>(id, entity));
             }
             catch (Exception)
             {
@@ -96,16 +113,16 @@ namespace WaterUseServices.Controllers
 
         }
         
-        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
+        [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
 
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<Region>(id);
+                var entity = await agent.Find<Region>(id);
                 if (entity == null) return new BadRequestResult();
-                agent.Delete<Region>(entity);
+                await agent.Delete<Region>(entity);
 
                 return Ok();
             }
@@ -117,17 +134,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(Region item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

@@ -28,16 +28,18 @@ using WiM.Utilities;
 using Microsoft.EntityFrameworkCore;
 using WaterUseAgent.Resources;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace WaterUseAgent
 {
     public interface IWaterUseAgent
     {
         IQueryable<T> Select<T>() where T : class, new();
-        T Find<T>(Int32 pk) where T : class, new();
-        T Add<T>(T item) where T : class, new();
-        T Update<T>(Int32 pkId, T item) where T : class, new();
-        void Delete<T>(T item) where T : class, new();
+        Task<T> Find<T>(Int32 pk) where T : class, new();
+        Task<T> Add<T>(T item) where T : class, new();
+        Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new();
+        Task<T> Update<T>(Int32 pkId, T item) where T : class, new();
+        Task Delete<T>(T item) where T : class, new();
         IQueryable<Role> GetRoles();
         Manager GetManagerByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
@@ -58,23 +60,26 @@ namespace WaterUseAgent
         {
             return base.Select<T>();
         }
-        public new T Find<T>(Int32 pk) where T : class, new()
+        public new Task<T> Find<T>(Int32 pk) where T : class, new()
         {
             return base.Find<T>(pk);
         }
-        public new T Add<T>(T item) where T : class, new()
+        public new Task<T> Add<T>(T item) where T : class, new()
         {
             return base.Add<T>(item);
         }
-        public new T Update<T>(Int32 pkId, T item) where T : class, new()
+        public new Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
+        {
+            return base.Add<T>(items);
+        }
+        public new Task<T> Update<T>(Int32 pkId, T item) where T : class, new()
         {
             return base.Update<T>(pkId, item);
         }
-        public new void Delete<T>(T item) where T : class, new()
+        public new Task Delete<T>(T item) where T : class, new()
         {
-            base.Delete<T>(item);
+            return base.Delete<T>(item);
         }
-
         #endregion
         #region Roles
         public IQueryable<Role> GetRoles() {

@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace WaterUseDB.Resources
 {
-    public class Manager
+    public partial class Manager
     {
         [Required]
         public int ID { get; set; }

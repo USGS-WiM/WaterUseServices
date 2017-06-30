@@ -21,16 +21,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WaterUseServices.XUnitTest
 {
-    public class Roles
+    public class PermitTest
     {
-        public RolesController controller { get; private set; }
-        public Roles() {
+        public PermitController controller { get; private set; }
+        public PermitTest() {
             //Arrange
-            controller = new RolesController(new InMemoryRolesAgent());
+            controller = new PermitController(new InMemoryPermitAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
-
-
         }
         [Fact]
         public async Task GetAll()
@@ -41,11 +39,10 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<EnumerableQuery<Role>>(okResult.Value);
+            var result = Assert.IsType<EnumerableQuery<Permit>>(okResult.Value);
 
             Assert.Equal(2, result.Count());
-            Assert.Equal("MockTestRole2", result.LastOrDefault().Name);
-            Assert.Equal("test mock role 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestRole2", result.LastOrDefault().PermitNO);
         }
 
         [Fact]
@@ -59,17 +56,16 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<Permit>(okResult.Value);
             
-            Assert.Equal("MockTestRole1", result.Name);
-            Assert.Equal("test mock role 1", result.Description);
+            Assert.Equal("MockTestRole1", result.PermitNO);
         }
 
         [Fact]
         public async Task Post()
         {
             //Arrange
-            var entity = new Role() {Name = "newRole", Description = "New mock role 3" };
+            var entity = new Permit() {PermitNO = "newPermitNo"};
    
 
             //Act
@@ -77,11 +73,10 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<Permit>(okResult.Value);
             
 
-            Assert.Equal("newRole", result.Name);
-            Assert.Equal("New mock role 3", result.Description);
+            Assert.Equal("newPermitNo", result.PermitNO);
         }
 
         [Fact]
@@ -90,19 +85,18 @@ namespace WaterUseServices.XUnitTest
             //Arrange
             var get = await controller.Get(1);
             var okgetResult = Assert.IsType<OkObjectResult>(get);
-            var entity = Assert.IsType<Role>(okgetResult.Value);
+            var entity = Assert.IsType<Permit>(okgetResult.Value);
 
-            entity.Name = "editedName";
+            entity.PermitNO = "editedPermitNo";
 
             //Act
-            var response = await controller.Post(entity);
+            var response = await controller.Put(1, entity);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<Permit>(okResult.Value);
 
-            Assert.Equal(entity.Name, result.Name);
-            Assert.Equal(entity.Description, result.Description);
+            Assert.Equal(entity.PermitNO, result.PermitNO);
             Assert.Equal(entity.ID, result.ID);
         }
 
@@ -116,48 +110,47 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<EnumerableQuery<Role>>(okResult.Value);
+            var result = Assert.IsType<EnumerableQuery<Permit>>(okResult.Value);
 
             Assert.Equal(1, result.Count());
-            Assert.Equal("MockTestRole2", result.LastOrDefault().Name);
-            Assert.Equal("test mock role 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestPermit2", result.LastOrDefault().PermitNO);
         }
     }
 
-    public class InMemoryRolesAgent : IWaterUseAgent
+    public class InMemoryPermitAgent : IWaterUseAgent
     {
-        private List<Role> Roles { get; set; }
+        private List<Permit> Permits { get; set; }
 
-        public InMemoryRolesAgent() {
-           this.Roles = new List<Role>()
-            { new Role() { ID=1,Name= "MockTestRole1", Description="test mock role 1" },
-                new Role() { ID=2,Name= "MockTestRole2", Description="test mock role 2" }};
+        public InMemoryPermitAgent() {
+           this.Permits = new List<Permit>()
+            { new Permit() { ID=1,PermitNO="MockTestPermit1" },
+                new Permit() { ID=2, PermitNO= "MockTestPermit2"} };
         
     }
 
         public Task<T> Add<T>(T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(Permit))
             {
-                Roles.Add(item as Role);
+                Permits.Add(item as Permit);
             }
             return Task.Run(()=> { return item; });
         }
 
         public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(Permit))
             {
-                Roles.AddRange(items.Cast<Role>());
+                Permits.AddRange(items.Cast<Permit>());
             }
-            return Task.Run(() => { return Roles.Cast<T>(); });
+            return Task.Run(() => { return Permits.Cast<T>(); });
         }
 
         public Task Delete<T>(T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(Permit))
             {                
-                return Task.Run(()=> { this.Roles.Remove(item as Role); });
+                return Task.Run(()=> { this.Permits.Remove(item as Permit); });
             }
 
             else
@@ -166,8 +159,8 @@ namespace WaterUseServices.XUnitTest
 
         public Task<T> Find<T>(int pk) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
-                return Task.Run(()=> { return Roles.Find(i => i.ID == pk) as T; });
+            if (typeof(T) == typeof(Permit))
+                return Task.Run(()=> { return Permits.Find(i => i.ID == pk) as T; });
 
             throw new Exception("not of correct type");
         }
@@ -179,24 +172,24 @@ namespace WaterUseServices.XUnitTest
 
         public IQueryable<Role> GetRoles()
         {
-            return this.Roles.AsQueryable();
+            throw new NotImplementedException();
         }
 
         public IQueryable<T> Select<T>() where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
-                return this.Roles.AsQueryable() as IQueryable<T>;
+            if (typeof(T) == typeof(Permit))
+                return this.Permits.AsQueryable() as IQueryable<T>;
 
             throw new Exception("not of correct type");
         }
 
         public Task<T> Update<T>(int pkId, T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(Permit))
             {
-                var index = this.Roles.FindIndex(x=>x.ID == pkId);
-                (item as Role).ID = pkId; 
-                this.Roles[index] = item as Role;
+                var index = this.Permits.FindIndex(x=>x.ID == pkId);
+                (item as Permit).ID = pkId; 
+                this.Permits[index] = item as Permit;
             }
             throw new Exception("not of correct type");
         }
@@ -220,13 +213,6 @@ namespace WaterUseServices.XUnitTest
         {
             throw new NotImplementedException();
         }
-    }
-    public class InMemoryModelValidator : IObjectModelValidator
-    {
-        public void Validate(ActionContext actionContext, ValidationStateDictionary validationState, string prefix, object model)
-        {
-            //assume all is valid
-            return;
-        }        
+
     }
 }

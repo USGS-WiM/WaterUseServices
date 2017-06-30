@@ -24,11 +24,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class StatusController : Controller
+    [Route("[controller]")]
+    public class StatusController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -57,7 +58,7 @@ namespace WaterUseServices.Controllers
             {
                 if(id<0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<StatusType>(id));
+                return Ok(await agent.Find<StatusType>(id));
             }
             catch (Exception)
             {
@@ -72,21 +73,37 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (!isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Add<StatusType>(entity));
+                return Ok(await agent.Add<StatusType>(entity));
             }
             catch (Exception)
             {
                 throw;
             }            
         }
-        
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<StatusType> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<StatusType>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]StatusType entity)
         {
             try
             {
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<StatusType>(id,entity));
+                return Ok(await agent.Update<StatusType>(id,entity));
             }
             catch (Exception)
             {
@@ -101,9 +118,9 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<StatusType>(id);
+                var entity = await agent.Find<StatusType>(id);
                 if (entity == null) return new BadRequestResult();
-                agent.Delete<StatusType>(entity);
+                await agent.Delete<StatusType>(entity);
 
                 return Ok();
             }
@@ -114,17 +131,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(StatusType item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

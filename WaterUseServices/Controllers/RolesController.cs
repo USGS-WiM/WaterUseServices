@@ -23,11 +23,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class RolesController : Controller
+    [Route("[controller]")]
+    public class RolesController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -56,7 +57,7 @@ namespace WaterUseServices.Controllers
             {
                 if(id<0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<Role>(id));
+                return Ok(await agent.Find<Role>(id));
             }
             catch (Exception)
             {
@@ -70,23 +71,38 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (!isValid(entity)) return new BadRequestResult();
+                if (!isValid(entity)) return new BadRequestObjectResult("Object is invalid");
 
-                return Ok(agent.Add<Role>(entity));
+                return Ok(await agent.Add<Role>(entity));
             }
             catch (Exception)
             {
                 throw;
             }            
         }
-       
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<Role> entities) {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<Role>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]Role entity)
         {
             try
             {
                 if (!isValid(entity) || id < 1) return new BadRequestResult();
-                return Ok(agent.Update<Role>(id,entity));
+                return Ok(await agent.Update<Role>(id,entity));
             }
             catch (Exception)
             {
@@ -100,10 +116,10 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var role = agent.Find<Role>(id);
+                var role = await agent.Find<Role>(id);
                 if (role == null) return new BadRequestResult();
 
-                agent.Delete<Role>(role);
+                await agent.Delete<Role>(role);
                 return Ok();
 
             }
@@ -115,16 +131,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(Role item) {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

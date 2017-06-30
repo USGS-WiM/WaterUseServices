@@ -23,15 +23,16 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class PermitsController : Controller
+    [Route("[controller]")]
+    public class PermitController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
-        public PermitsController(IWaterUseAgent sa) {
+        public PermitController(IWaterUseAgent sa) {
             this.agent = sa;
         }
         #region METHODS
@@ -56,7 +57,7 @@ namespace WaterUseServices.Controllers
             {
                 if(id<0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<Permit>(id));
+                return Ok(await agent.Find<Permit>(id));
             }
             catch (Exception)
             {
@@ -65,28 +66,44 @@ namespace WaterUseServices.Controllers
             }            
         }
       
-        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [HttpPost][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Post([FromBody]Permit entity)
         {
             try
             {
                 if (!isValid(entity)) return new BadRequestResult();
 
-                return Ok(agent.Add<Permit>(entity));
+                return Ok(await agent.Add<Permit>(entity));
             }
             catch (Exception)
             {
                 throw;
             }            
         }
-       
-        [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
+
+        [HttpPost][Authorize(Policy = "Restricted")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<Permit> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<Permit>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPut("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Put(int id, [FromBody]Permit entity)
         {
             try
             {
                 if (!isValid(entity) || id < 1) return new BadRequestResult();
-                return Ok(agent.Update<Permit>(id,entity));
+                return Ok(await agent.Update<Permit>(id,entity));
             }
             catch (Exception)
             {
@@ -94,16 +111,16 @@ namespace WaterUseServices.Controllers
             }
         }
        
-        [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
+        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entityToDelete = agent.Find<Permit>(id);
+                var entityToDelete = await agent.Find<Permit>(id);
                 if (entityToDelete == null) return new BadRequestResult();
 
-                agent.Delete<Permit>(entityToDelete);
+                await agent.Delete<Permit>(entityToDelete);
                 return Ok();
 
             }
@@ -115,16 +132,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(Permit item) {
-            try
-            {
-                return string.IsNullOrEmpty(item.PermitNO);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

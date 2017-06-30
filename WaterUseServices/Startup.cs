@@ -42,7 +42,16 @@ namespace WaterUseServices
 
             services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();
             services.AddAuthorization(options =>loadAutorizationPolicies(options));
-            services.AddMvc();            
+            services.AddCors(options => {
+                options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
+                                                                 .AllowAnyMethod()
+                                                                 .AllowAnyHeader()
+                                                                 .AllowCredentials());
+            });
+            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true; })
+                                .AddXmlSerializerFormatters()
+                                .AddXmlDataContractSeria‌​lizerFormatters();
+
         }       
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +60,8 @@ namespace WaterUseServices
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             app.UseBasicAuthentication(new BasicAuthenticationOptions());
+            // global policy - assign here or on each controller
+            app.UseCors("CorsPolicy");
             app.UseMvc();
         }
 
@@ -67,6 +78,7 @@ namespace WaterUseServices
                 "AdminOnly",
                 policy => policy.RequireRole("Administrator"));
         }
+
         #endregion
 
 

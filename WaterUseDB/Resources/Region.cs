@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace WaterUseDB.Resources
 {
-    public class Region
+    public partial class Region
     {
         [Required]
         public int ID { get; set; }

@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
+    [Route("[controller]")]
     public class SummaryController : NSSControllerBase
     {
         private IWaterUseAgent agent;
@@ -61,6 +61,7 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPost][HttpGet]
+        [Authorize(Policy = "Restricted")]
         [Route("BySource")]
         public async Task<IActionResult> BySource([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
         {
@@ -85,7 +86,6 @@ namespace WaterUseServices.Controllers
                 
         #endregion
         #region HELPER METHODS
-       
         #endregion
     }
 }

@@ -29,5 +29,17 @@ namespace WaterUseServices.Controllers
             char[] delimiterChars = { ';', ',' };
             return items.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries).Select(i=>i.Trim().ToLower()).ToList();
         }
+        protected virtual Boolean isValid(object item)
+        {
+            try
+            {
+                var isvalid = this.TryValidateModel(item);
+                return isvalid;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

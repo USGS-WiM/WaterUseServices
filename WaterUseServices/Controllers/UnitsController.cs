@@ -24,11 +24,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class UnitsController : Controller
+    [Route("[controller]")]
+    public class UnitsController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -57,7 +58,7 @@ namespace WaterUseServices.Controllers
             {
                 if(id<0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<UnitType>(id));
+                return Ok(await agent.Find<UnitType>(id));
             }
             catch (Exception)
             {
@@ -72,21 +73,37 @@ namespace WaterUseServices.Controllers
             try
             {
                  if (!isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Add<UnitType>(entity));
+                return Ok(await agent.Add<UnitType>(entity));
             }
             catch (Exception)
             {
                 throw;
             }            
         }
-        
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<UnitType> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<UnitType>(entities));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]UnitType entity)
         {
             try
             {
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<UnitType>(id,entity));
+                return Ok(await agent.Update<UnitType>(id,entity));
             }
             catch (Exception)
             {
@@ -94,6 +111,7 @@ namespace WaterUseServices.Controllers
             }
 
         }        
+
         [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -101,9 +119,9 @@ namespace WaterUseServices.Controllers
             {
 
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<UnitType>(id);
+                var entity = await agent.Find<UnitType>(id);
                 if (entity == null) return new BadRequestResult();
-                agent.Delete<UnitType>(entity);
+                await agent.Delete<UnitType>(entity);
 
                 return Ok();
             }
@@ -115,17 +133,6 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(UnitType item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }
