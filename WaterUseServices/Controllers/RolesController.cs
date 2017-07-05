@@ -43,10 +43,9 @@ namespace WaterUseServices.Controllers
             {
                 return Ok(agent.Select<Role>());   
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }                 
         }
         
@@ -59,10 +58,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Find<Role>(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }            
         }
       
@@ -75,9 +73,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Add<Role>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }            
         }
 
@@ -90,9 +88,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Add<Role>(entities));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -104,9 +102,9 @@ namespace WaterUseServices.Controllers
                 if (!isValid(entity) || id < 1) return new BadRequestResult();
                 return Ok(await agent.Update<Role>(id,entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
        
@@ -123,9 +121,9 @@ namespace WaterUseServices.Controllers
                 return Ok();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
             
         }

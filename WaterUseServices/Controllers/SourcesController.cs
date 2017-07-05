@@ -23,6 +23,7 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
@@ -43,14 +44,12 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                return Ok(agent.Select<Source>());
+                return Ok(agent.Select<Source>().Take(10));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
-            }
-            
+                return await HandleExceptionAsync(ex);
+            }            
         }
         
         [HttpGet("{id}")]
@@ -61,11 +60,13 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(await agent.Find<Source>(id));
+                var x = await agent.Find<Source>(id);
+
+                return Ok(x);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -77,9 +78,9 @@ namespace WaterUseServices.Controllers
                 if (!isValid(entity)) return new BadRequestResult();
                 return Ok(await agent.Add<Source>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -93,9 +94,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Add<Source>(entities));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -107,10 +108,9 @@ namespace WaterUseServices.Controllers
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(await agent.Update<Source>(id, entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
 
         }
@@ -128,10 +128,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         #endregion

@@ -127,6 +127,7 @@ namespace WaterUseServices.XUnitTest
     public class InMemoryRolesAgent : IWaterUseAgent
     {
         private List<Role> Roles { get; set; }
+        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
 
         public InMemoryRolesAgent() {
            this.Roles = new List<Role>()

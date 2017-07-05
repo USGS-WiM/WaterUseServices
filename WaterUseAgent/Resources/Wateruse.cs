@@ -19,12 +19,20 @@ namespace WaterUseAgent.Resources
     public class WateruseSummary {
         public WateruseValue Annual { get; set; }
         public IDictionary<Int32, MonthlySummary> Monthly { get; set; }
+        public PermittedSummary Permitted { get; set; }
+        public bool ShouldSerializePermitted()
+        { return Permitted != null; }
     }
     public class MonthlySummary {
         public WateruseValue Month { get; set; }
         public IDictionary<string,WateruseValue> Code { get; set; }
         public bool ShouldSerializeCode()
         { return Code != null && Code.Count > 0; }
+    }
+
+    public class PermittedSummary {
+        public WateruseValue Well { get; set; }
+        public WateruseValue Intake { get; set; }
     }
 
     public class WateruseValue {

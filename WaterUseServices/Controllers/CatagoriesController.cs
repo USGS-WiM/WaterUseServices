@@ -45,10 +45,9 @@ namespace WaterUseServices.Controllers
             {
                 return Ok(agent.Select<CatagoryType>());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
 
         }
@@ -62,10 +61,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Find<CatagoryType>(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -77,9 +75,9 @@ namespace WaterUseServices.Controllers
                 if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(await agent.Add<CatagoryType>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -93,9 +91,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Add<CatagoryType>(entities));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -107,9 +105,9 @@ namespace WaterUseServices.Controllers
                 if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(await agent.Update<CatagoryType>(id, entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
            
         }
@@ -128,9 +126,9 @@ namespace WaterUseServices.Controllers
                 return Ok();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         #endregion

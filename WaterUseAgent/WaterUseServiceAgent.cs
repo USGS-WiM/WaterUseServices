@@ -34,6 +34,7 @@ namespace WaterUseAgent
 {
     public interface IWaterUseAgent
     {
+        Boolean IncludePermittedWithdrawals {set; }
         IQueryable<T> Select<T>() where T : class, new();
         Task<T> Find<T>(Int32 pk) where T : class, new();
         Task<T> Add<T>(T item) where T : class, new();
@@ -49,6 +50,8 @@ namespace WaterUseAgent
     }
     public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent
     {
+        public bool IncludePermittedWithdrawals { private get; set; }
+
         public WaterUseServiceAgent(WaterUseDBContext context) : base(context) {
 
             //optimize query for disconnected databases.
@@ -193,7 +196,9 @@ namespace WaterUseAgent
             List<Source> sourceList = null;
             try
             {
+                if (IncludePermittedWithdrawals) sources = sources.Include(s => s.Permits).Include("TimeSeries.UnitType");
                 sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
+                
                 return new Wateruse()
                 {                    
                     ProcessDate = DateTime.Now,
@@ -207,7 +212,18 @@ namespace WaterUseAgent
             {
                 throw;
             }
+        }      
+        private IDictionary<string, Wateruse> getWateruseBySource(IList<Source> sources, int startyear, int? endyear)
+        {
+            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
+
+            foreach (var item in sources)
+            { 
+                result.Add(item.FacilityCode, getAggregatedWaterUse(sources.Where(i => i.Equals(item)).AsQueryable(), startyear, endyear));
+            }//next item
+            return result;
         }
+
         private IDictionary<string, Wateruse> getAggregatedWaterUseBySource(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
         {
             List<Source> sourceList = null;
@@ -223,33 +239,43 @@ namespace WaterUseAgent
                         ProcessDate = DateTime.Now,
                         StartYear = startyear,
                         EndYear = endyear,
-                        Return = item.SourceType.Code =="SW"?wu:null,
+                        Return = item.SourceType.Code == "SW" ? wu : null,
                         Withdrawal = item.SourceType.Code == "GW" ? wu : null,
                     });
 
                 }//next item
-                return result; 
+                return result;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
         private WateruseSummary getWaterUseSummary(IList<Source> sources, Int32 startyear, Int32? endyear)
         {
             List<TimeSeries> tslist = null;
             Int32 yrspan = 1;
+            List<Permit> pmtlist = null;
+            SourceType sType = null;
+
             try
             {
                 if (!endyear.HasValue) endyear = startyear;
                 yrspan = (endyear.Value + 1) - startyear;
 
                 tslist = sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value).ToList();
+                if (this.IncludePermittedWithdrawals)
+                    pmtlist = sources.SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
+                                                                                p.StartDate.Value.Year <= endyear.Value).ToList();
+
                 if (tslist.Count < 1) return null;
+                sType = tslist.First().Source.SourceType;
+
                 return new WateruseSummary() {
                     Annual = new WateruseValue() {
-                        Name = tslist.First().Source.SourceType.Name,
-                        Description = "Daily Annual Average " + tslist.First().Source.SourceType.Description,
+                        Name = sType.Name,
+                        Description = "Daily Annual Average " + sType.Description,
                         Value = tslist.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year)),
                         Unit = tslist.First().UnitType
                     },
@@ -270,26 +296,29 @@ namespace WaterUseAgent
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value / yrspan)
                         }) : null
-                    })
-                     
+                    }),
+                      Permitted = pmtlist !=null && pmtlist.Count >0 ? new PermittedSummary() {
+                        Well = new WateruseValue() {
+                            Name = "Permitted " + sType.Name,
+                            Description = "Daily Annual Average Permitted" + sType.Description,
+                            Value = pmtlist.Where(p=>p.WellCapacity.HasValue).Sum(p => p.WellCapacity.Value * DateTime.DaysInMonth(p.StartDate.Value.Year, p.StartDate.Value.Month) / getDaysInYear(p.StartDate.Value.Year)),
+                            Unit = pmtlist.First().UnitType
+                        },
+                        Intake = new WateruseValue()
+                        {
+                            Name = "Permitted " + sType.Name,
+                            Description = "Daily Annual Average Permitted" + sType.Description,
+                            Value = pmtlist.Where(p => p.IntakeCapacity.HasValue).Sum(p => p.IntakeCapacity.Value * DateTime.DaysInMonth(p.StartDate.Value.Year, p.StartDate.Value.Month) / getDaysInYear(p.StartDate.Value.Year)),
+                            Unit = pmtlist.First().UnitType
+                        },
+                      }:null                     
                 };
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-
-        private IDictionary<string, Wateruse> getWateruseBySource(IList<Source> sources, int startyear, int? endyear)
-        {
-            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
-
-            foreach (var item in sources)
-            { 
-                result.Add(item.FacilityCode, getAggregatedWaterUse(sources.Where(i => i.Equals(item)).AsQueryable(), startyear, endyear));
-            }//next item
-            return result;
-        }
+        }        
 
         private int getDaysInYear(Int32 year)
         {

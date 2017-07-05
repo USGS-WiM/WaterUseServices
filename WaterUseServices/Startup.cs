@@ -48,7 +48,7 @@ namespace WaterUseServices
                                                                  .AllowAnyHeader()
                                                                  .AllowCredentials());
             });
-            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true; })
+            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true;})
                                 .AddXmlSerializerFormatters()
                                 .AddXmlDataContractSeria‌​lizerFormatters();
 

@@ -39,11 +39,12 @@ namespace WaterUseServices.Controllers
 
         #region METHOD
         [HttpPost][HttpGet]
-        public async Task<IActionResult> Get([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
+        public async Task<IActionResult> Get([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "",[FromQuery]bool includePermit = false)
         {
             try
             {
                 if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+                if (includePermit) agent.IncludePermittedWithdrawals = includePermit;
 
                 if (!string.IsNullOrEmpty(sources))
                 {
@@ -56,18 +57,19 @@ namespace WaterUseServices.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
         [HttpPost][HttpGet]
         [Authorize(Policy = "Restricted")]
         [Route("BySource")]
-        public async Task<IActionResult> BySource([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
+        public async Task<IActionResult> BySource([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "",[FromQuery]bool includePermit = false)
         {
             try
             {
                 if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+                if (includePermit) agent.IncludePermittedWithdrawals = includePermit;
 
                 if (!string.IsNullOrEmpty(sources))
                 {
@@ -78,9 +80,9 @@ namespace WaterUseServices.Controllers
                 if (basin == null) return new BadRequestResult(); //return HTTP 401
                 return Ok(agent.GetWaterusebySource(basin, startyear, endyear));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
                 

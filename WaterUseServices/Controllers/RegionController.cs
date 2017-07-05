@@ -44,10 +44,9 @@ namespace WaterUseServices.Controllers
             {
                 return Ok(agent.Select<Region>());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
             
         }
@@ -61,9 +60,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Find<Region>(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -75,9 +74,9 @@ namespace WaterUseServices.Controllers
                 if (!isValid(entity)) return new BadRequestResult();
                 return Ok(await agent.Add<Region>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -91,9 +90,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok(await agent.Add<Region>(entities));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
@@ -105,10 +104,9 @@ namespace WaterUseServices.Controllers
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(await agent.Update<Region>(id, entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
 
         }
@@ -126,10 +124,9 @@ namespace WaterUseServices.Controllers
 
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         #endregion
