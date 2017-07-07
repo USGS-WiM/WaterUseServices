@@ -205,7 +205,7 @@ namespace WaterUseAgent
                     ProcessDate = DateTime.Now,
                     StartYear = startyear,
                     EndYear = endyear,
-                    //Return = getWaterUseReturns(sourceList.Where(s => s.SourceType.Code == "SW").ToList(), startyear, endyear),
+                    Return = getWaterUseReturns(sourceList.Where(s => s.SourceType.Code == "SW").ToList(), startyear, endyear),
                     Withdrawal = getWaterUseWithdrawals(sourceList.ToList(), startyear, endyear)
                 };
             }   
@@ -213,45 +213,34 @@ namespace WaterUseAgent
             {
                 throw;
             }
-        }      
-        private IDictionary<string, Wateruse> getWateruseBySource(IList<Source> sources, int startyear, int? endyear)
-        {
-            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
-
-            foreach (var item in sources)
-            { 
-                result.Add(item.FacilityCode, getAggregatedWaterUse(sources.Where(i => i.Equals(item)).AsQueryable(), startyear, endyear));
-            }//next item
-            return result;
         }
-
         private IDictionary<string, Wateruse> getAggregatedWaterUseBySource(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
-        {
-            List<Source> sourceList = null;
-            Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
-            try
-            {
-                sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
-                foreach (var item in sourceList)
                 {
-                    var wu = getWaterUseWithdrawals(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear);
-                    result.Add(item.FacilityCode, new Wateruse()
+                    List<Source> sourceList = null;
+                    Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
+                    try
                     {
-                        ProcessDate = DateTime.Now,
-                        StartYear = startyear,
-                        EndYear = endyear,
-                        Return = item.SourceType.Code == "SW" ? wu : null,
-                        Withdrawal = item.SourceType.Code == "GW" ? wu : null,
-                    });
+                        sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
+                        foreach (var item in sourceList)
+                        {
+                            item.CatagoryTypeID = null;
+                            result.Add(item.FacilityCode, new Wateruse()
+                            {
+                                ProcessDate = DateTime.Now,
+                                StartYear = startyear,
+                                EndYear = endyear,
+                                Return = getWaterUseReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear),
+                                Withdrawal = getWaterUseWithdrawals(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear)
+                        });
 
-                }//next item
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+                        }//next item
+                        return result;
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
 
         private WateruseSummary getWaterUseWithdrawals(IList<Source> sources, Int32 startyear, Int32? endyear)
         {
@@ -327,6 +316,11 @@ namespace WaterUseAgent
                 sm(WiM.Resources.MessageType.error, "Error computing WU: " + ex.Message);
                 return null;
             }
+        }
+
+        private WateruseSummary getWaterUseReturns(List<Source> sources, int startyear, int? endyear)
+        {
+            return null;
         }
 
         private IEnumerable<TimeSeries> getDomesticTimeseries(int startyear, int endyear)
