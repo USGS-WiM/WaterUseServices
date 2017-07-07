@@ -24,11 +24,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class CatagoriesController : Controller
+    [Route("[controller]")]
+    public class CatagoriesController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -44,10 +45,9 @@ namespace WaterUseServices.Controllers
             {
                 return Ok(agent.Select<CatagoryType>());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
 
         }
@@ -59,12 +59,11 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<CatagoryType>(id));
+                return Ok(await agent.Find<CatagoryType>(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -74,25 +73,41 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Add<CatagoryType>(entity));
+                return Ok(await agent.Add<CatagoryType>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
-        
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<CatagoryType> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<CatagoryType>(entities));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]CatagoryType entity)
         {
             try
             {
                 if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<CatagoryType>(id, entity));
+                return Ok(await agent.Update<CatagoryType>(id, entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
            
         }
@@ -103,32 +118,21 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<CatagoryType>(id);
+                var entity = await agent.Find<CatagoryType>(id);
                 if (entity == null) return new BadRequestResult();
 
-                agent.Delete<CatagoryType>(entity);
+                await agent.Delete<CatagoryType>(entity);
 
                 return Ok();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(CatagoryType item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

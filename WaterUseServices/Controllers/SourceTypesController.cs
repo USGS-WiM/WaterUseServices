@@ -23,11 +23,12 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class SourceTypesController : Controller
+    [Route("[controller]")]
+    public class SourceTypesController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -43,10 +44,9 @@ namespace WaterUseServices.Controllers
             {
                 return Ok(agent.Select<SourceType>());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
             
         }
@@ -58,11 +58,11 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(agent.Find<SourceType>(id));
+                return Ok(await agent.Find<SourceType>(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         
@@ -72,26 +72,41 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (!isValid(entity)) return new BadRequestResult();
-                return Ok(agent.Add<SourceType>(entity));
+                return Ok(await agent.Add<SourceType>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
-     
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<SourceType> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<SourceType>(entities));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Put(int id, [FromBody]SourceType entity)
         {
             try
             {
                 if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(agent.Update<SourceType>(id, entity));
+                return Ok(await agent.Update<SourceType>(id, entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
 
         }
@@ -103,31 +118,19 @@ namespace WaterUseServices.Controllers
             {
 
                 if (id < 1) return new BadRequestResult();
-                var entity = agent.Find<SourceType>(id);
+                var entity = await agent.Find<SourceType>(id);
                 if (entity == null) return new BadRequestResult();
-                agent.Delete<SourceType>(entity);
+                await agent.Delete<SourceType>(entity);
 
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
         #endregion
         #region HELPER METHODS
-        private Boolean isValid(SourceType item)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(item.Name);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         #endregion
     }
 }

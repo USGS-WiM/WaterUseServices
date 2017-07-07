@@ -21,7 +21,7 @@
 using System.ComponentModel.DataAnnotations;
 namespace WaterUseDB.Resources
 {
-    public class RegionManager
+    public partial class RegionManager
     {
         [Required]
         public int RegionID { get; set; }

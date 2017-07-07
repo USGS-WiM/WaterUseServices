@@ -21,12 +21,12 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WaterUseServices.XUnitTest
 {
-    public class Roles
+    public class CatagoriesTest
     {
-        public RolesController controller { get; private set; }
-        public Roles() {
+        public CatagoriesController controller { get; private set; }
+        public CatagoriesTest() {
             //Arrange
-            controller = new RolesController(new InMemoryRolesAgent());
+            controller = new CatagoriesController(new InMemoryCatagoriesAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
 
@@ -41,11 +41,11 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<EnumerableQuery<Role>>(okResult.Value);
+            var result = Assert.IsType<EnumerableQuery<CatagoryType>>(okResult.Value);
 
             Assert.Equal(2, result.Count());
-            Assert.Equal("MockTestRole2", result.LastOrDefault().Name);
-            Assert.Equal("test mock role 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestCatagory2", result.LastOrDefault().Name);
+            Assert.Equal("test mock catagory 2", result.LastOrDefault().Description);
         }
 
         [Fact]
@@ -59,17 +59,17 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<CatagoryType>(okResult.Value);
             
-            Assert.Equal("MockTestRole1", result.Name);
-            Assert.Equal("test mock role 1", result.Description);
+            Assert.Equal("MockTestCatagory1", result.Name);
+            Assert.Equal("test mock catagory 1", result.Description);
         }
 
         [Fact]
         public async Task Post()
         {
             //Arrange
-            var entity = new Role() {Name = "newRole", Description = "New mock role 3" };
+            var entity = new CatagoryType() {Name = "newCatagory", Description = "New mock catagory 3" };
    
 
             //Act
@@ -90,7 +90,7 @@ namespace WaterUseServices.XUnitTest
             //Arrange
             var get = await controller.Get(1);
             var okgetResult = Assert.IsType<OkObjectResult>(get);
-            var entity = Assert.IsType<Role>(okgetResult.Value);
+            var entity = Assert.IsType<CatagoryType>(okgetResult.Value);
 
             entity.Name = "editedName";
 
@@ -99,7 +99,7 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<CatagoryType>(okResult.Value);
 
             Assert.Equal(entity.Name, result.Name);
             Assert.Equal(entity.Description, result.Description);
@@ -119,46 +119,45 @@ namespace WaterUseServices.XUnitTest
             var result = Assert.IsType<EnumerableQuery<Role>>(okResult.Value);
 
             Assert.Equal(1, result.Count());
-            Assert.Equal("MockTestRole2", result.LastOrDefault().Name);
-            Assert.Equal("test mock role 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestCatagory2", result.LastOrDefault().Name);
+            Assert.Equal("test mock catagory 2", result.LastOrDefault().Description);
         }
     }
 
-    public class InMemoryRolesAgent : IWaterUseAgent
+    public class InMemoryCatagoriesAgent : IWaterUseAgent
     {
-        private List<Role> Roles { get; set; }
-        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
+        private List<CatagoryType> Catagories { get; set; }
 
-        public InMemoryRolesAgent() {
-           this.Roles = new List<Role>()
-            { new Role() { ID=1,Name= "MockTestRole1", Description="test mock role 1" },
-                new Role() { ID=2,Name= "MockTestRole2", Description="test mock role 2" }};
+        public InMemoryCatagoriesAgent() {
+           this.Catagories = new List<CatagoryType>()
+            { new CatagoryType() { ID=1,Name= "MockTestCatagory1", Description="test mock catagory 1" },
+                new CatagoryType() { ID=2,Name= "MockTestCatagory2", Description="test mock catagory 2" }};
         
     }
 
         public Task<T> Add<T>(T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(CatagoryType))
             {
-                Roles.Add(item as Role);
+                Catagories.Add(item as CatagoryType);
             }
             return Task.Run(()=> { return item; });
         }
 
         public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(CatagoryType))
             {
-                Roles.AddRange(items.Cast<Role>());
+                Catagories.AddRange(items.Cast<CatagoryType>());
             }
-            return Task.Run(() => { return Roles.Cast<T>(); });
+            return Task.Run(() => { return Catagories.Cast<T>(); });
         }
 
         public Task Delete<T>(T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(CatagoryType))
             {                
-                return Task.Run(()=> { this.Roles.Remove(item as Role); });
+                return Task.Run(()=> { this.Catagories.Remove(item as CatagoryType); });
             }
 
             else
@@ -167,8 +166,8 @@ namespace WaterUseServices.XUnitTest
 
         public Task<T> Find<T>(int pk) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
-                return Task.Run(()=> { return Roles.Find(i => i.ID == pk) as T; });
+            if (typeof(T) == typeof(CatagoryType))
+                return Task.Run(()=> { return Catagories.Find(i => i.ID == pk) as T; });
 
             throw new Exception("not of correct type");
         }
@@ -180,24 +179,24 @@ namespace WaterUseServices.XUnitTest
 
         public IQueryable<Role> GetRoles()
         {
-            return this.Roles.AsQueryable();
+            throw new NotImplementedException();
         }
 
         public IQueryable<T> Select<T>() where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
-                return this.Roles.AsQueryable() as IQueryable<T>;
+            if (typeof(T) == typeof(CatagoryType))
+                return this.Catagories.AsQueryable() as IQueryable<T>;
 
             throw new Exception("not of correct type");
         }
 
         public Task<T> Update<T>(int pkId, T item) where T : class, new()
         {
-            if (typeof(T) == typeof(Role))
+            if (typeof(T) == typeof(CatagoryType))
             {
-                var index = this.Roles.FindIndex(x=>x.ID == pkId);
-                (item as Role).ID = pkId; 
-                this.Roles[index] = item as Role;
+                var index = this.Catagories.FindIndex(x=>x.ID == pkId);
+                (item as CatagoryType).ID = pkId; 
+                this.Catagories[index] = item as CatagoryType;
             }
             throw new Exception("not of correct type");
         }
@@ -221,13 +220,6 @@ namespace WaterUseServices.XUnitTest
         {
             throw new NotImplementedException();
         }
-    }
-    public class InMemoryModelValidator : IObjectModelValidator
-    {
-        public void Validate(ActionContext actionContext, ValidationStateDictionary validationState, string prefix, object model)
-        {
-            //assume all is valid
-            return;
-        }        
+
     }
 }

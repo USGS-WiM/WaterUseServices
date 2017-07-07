@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
+    [Route("[controller]")]
     public class SummaryController : NSSControllerBase
     {
         private IWaterUseAgent agent;
@@ -39,53 +39,66 @@ namespace WaterUseServices.Controllers
 
         #region METHOD
         [HttpPost][HttpGet]
-        public async Task<IActionResult> Get([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
+        public async Task<IActionResult> Get([FromQuery] Int32 year, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, 
+                                                [FromQuery]string sources = "",[FromQuery]bool includePermits = false, 
+                                                [FromQuery]double? domesticGW = null, [FromQuery]double? domesticSW = null)
         {
             try
             {
-                if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+                if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+
+                if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
+                if (domesticGW.HasValue || domesticSW.HasValue)
+                    agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW };
 
                 if (!string.IsNullOrEmpty(sources))
                 {
                     if (!User.Identity.IsAuthenticated) return new UnauthorizedResult();// return HTTP 401
-                    return Ok(agent.GetWateruse(parse(sources), startyear, endyear));
+                    return Ok(agent.GetWateruse(parse(sources), year, endyear));
                 }//end if
 
                 if (basin == null) return new BadRequestResult(); //return HTTP 404
-                return Ok(agent.GetWateruse(basin, startyear, endyear));
+                return Ok(agent.GetWateruse(basin, year, endyear));
             }
             catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
 
         [HttpPost][HttpGet]
+        [Authorize(Policy = "Restricted")]
         [Route("BySource")]
-        public async Task<IActionResult> BySource([FromQuery] Int32 startyear, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, [FromQuery]string sources = "")
+        public async Task<IActionResult> BySource([FromQuery] Int32 year, [FromQuery]Int32? endyear = null, [FromBody] object basin = null,
+                                                    [FromQuery]string sources = "",[FromQuery]bool includePermits = false,
+                                                    [FromQuery]double? domesticGW = null, [FromQuery]double? domesticSW = null)
         {
             try
             {
-                if (startyear < 1900 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+                if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
+
+                if (includePermits)
+                    agent.IncludePermittedWithdrawals = includePermits;
+                if (domesticGW.HasValue || domesticSW.HasValue)
+                    agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW }; 
 
                 if (!string.IsNullOrEmpty(sources))
                 {
                     if (!User.Identity.IsAuthenticated) return new UnauthorizedResult(); //return HTTP 404                   
-                    return Ok(agent.GetWaterusebySource(parse(sources), startyear, endyear));
+                    return Ok(agent.GetWaterusebySource(parse(sources), year, endyear));
                 }//end if
 
                 if (basin == null) return new BadRequestResult(); //return HTTP 401
-                return Ok(agent.GetWaterusebySource(basin, startyear, endyear));
+                return Ok(agent.GetWaterusebySource(basin, year, endyear));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
             }
         }
                 
         #endregion
         #region HELPER METHODS
-       
         #endregion
     }
 }

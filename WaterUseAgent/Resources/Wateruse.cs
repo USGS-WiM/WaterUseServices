@@ -13,15 +13,21 @@ namespace WaterUseAgent.Resources
         { return EndYear.HasValue; }
         public DateTime ProcessDate { get; set; }
         public WateruseSummary Return { get; set; }
+        public bool ShouldSerializeReturn()
+        { return Return != null; }
         public WateruseSummary Withdrawal { get; set; }
     }
 
     public class WateruseSummary {
-        public WateruseValue Annual { get; set; }
+        public IDictionary<string, WateruseValue> Annual { get; set; }
         public IDictionary<Int32, MonthlySummary> Monthly { get; set; }
+        public IDictionary<string, WateruseValue> Permitted { get; set; }
+        public bool ShouldSerializePermitted()
+        { return Permitted != null && Permitted.Count > 0; }
     }
+
     public class MonthlySummary {
-        public WateruseValue Month { get; set; }
+        public IDictionary<string, WateruseValue> Month { get; set; }
         public IDictionary<string,WateruseValue> Code { get; set; }
         public bool ShouldSerializeCode()
         { return Code != null && Code.Count > 0; }

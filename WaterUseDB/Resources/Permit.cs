@@ -23,7 +23,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public class Permit
+    public partial class Permit
     {
         public int ID { get; set; }
         [Required]

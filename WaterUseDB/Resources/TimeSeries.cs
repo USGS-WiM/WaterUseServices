@@ -23,7 +23,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public class TimeSeries
+    public partial class TimeSeries
     {
         [Required]
         public int ID { get; set; }
