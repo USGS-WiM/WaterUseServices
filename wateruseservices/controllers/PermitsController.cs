@@ -17,7 +17,6 @@
 //              
 //
 // 
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -29,67 +28,66 @@ using System.Collections.Generic;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class CatagoriesController : NSSControllerBase
+    public class PermitsController : NSSControllerBase
     {
         private IWaterUseAgent agent;
 
-        public CatagoriesController(IWaterUseAgent sa)
-        {
+        public PermitsController(IWaterUseAgent sa) {
             this.agent = sa;
         }
         #region METHODS
-        [HttpGet]
+        [HttpGet][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get()
         {
             try
             {
-                return Ok(agent.Select<CatagoryType>());
+                return Ok(agent.Select<Permit>());   
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-            }
-
+            }                 
         }
         
-        [HttpGet("{id}")]
+        [HttpGet("{id}")][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get(int id)
         {
             try
             {
-                if (id < 0) return new BadRequestResult(); // This returns HTTP 404
+                if(id<0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(await agent.Find<CatagoryType>(id));
+                return Ok(await agent.Find<Permit>(id));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-            }
+            }            
         }
-        
-        [HttpPost][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Post([FromBody]CatagoryType entity)
+      
+        [HttpPost][Authorize(Policy = "Restricted")]
+        public async Task<IActionResult> Post([FromBody]Permit entity)
         {
             try
             {
-                if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(await agent.Add<CatagoryType>(entity));
+                if (!isValid(entity)) return new BadRequestResult();
+
+                return Ok(await agent.Add<Permit>(entity));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-            }
+            }            
         }
 
-        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [HttpPost][Authorize(Policy = "Restricted")]
         [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<CatagoryType> entities)
+        public async Task<IActionResult> Batch([FromBody]List<Permit> entities)
         {
             try
             {
                 if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
 
-                return Ok(await agent.Add<CatagoryType>(entities));
+                return Ok(await agent.Add<Permit>(entities));
             }
             catch (Exception ex)
             {
@@ -97,32 +95,30 @@ namespace WaterUseServices.Controllers
             }
         }
 
-        [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Put(int id, [FromBody]CatagoryType entity)
+        [HttpPut("{id}")][Authorize(Policy = "CanModify")]
+        public async Task<IActionResult> Put(int id, [FromBody]Permit entity)
         {
             try
             {
-                if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(await agent.Update<CatagoryType>(id, entity));
+                if (!isValid(entity) || id < 1) return new BadRequestResult();
+                return Ok(await agent.Update<Permit>(id,entity));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
-           
         }
-        
-        [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
+       
+        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entity = await agent.Find<CatagoryType>(id);
-                if (entity == null) return new BadRequestResult();
+                var entityToDelete = await agent.Find<Permit>(id);
+                if (entityToDelete == null) return new BadRequestResult();
 
-                await agent.Delete<CatagoryType>(entity);
-
+                await agent.Delete<Permit>(entityToDelete);
                 return Ok();
 
             }
@@ -130,6 +126,7 @@ namespace WaterUseServices.Controllers
             {
                 return await HandleExceptionAsync(ex);
             }
+            
         }
         #endregion
         #region HELPER METHODS

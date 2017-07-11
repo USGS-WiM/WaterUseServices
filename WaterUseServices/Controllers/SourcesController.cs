@@ -25,6 +25,7 @@ using WaterUseAgent;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace WaterUseServices.Controllers
 {
@@ -40,18 +41,41 @@ namespace WaterUseServices.Controllers
         #region METHODS
         [HttpGet]
         [Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] int? RegionID = null)
         {
+            IQueryable<Source> query = null;
             try
             {
-                return Ok(agent.Select<Source>().Take(10));
+                query = agent.Select<Source>();               
+
+                if (!User.IsInRole("Administrator"))
+                {
+                    //get logged in users ID
+                    Int32 ID = LoggedInUser().ID;
+                    if(ID < 1) return new BadRequestResult(); // This returns HTTP 404
+                    query = query.Include(s => s.Region).ThenInclude(s=>s.RegionManagers).Where(s=>s.Region.RegionManagers.Any(rm=>rm.ManagerID == ID));
+                }//end if
+
+                if (RegionID.HasValue)
+                    query = query.Where(s => s.RegionID == RegionID);
+                return Ok(query.Select(s => new Source()
+                                                {
+                                                    ID = s.ID,
+                                                    CatagoryTypeID = s.CatagoryTypeID,
+                                                    FacilityCode = s.FacilityCode,
+                                                    FacilityName = s.FacilityName,
+                                                    Name = s.Name,
+                                                    RegionID = s.RegionID,
+                                                    SourceTypeID = s.SourceTypeID,
+                                                    StationID = s.StationID
+                                                }));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-            }            
+            }
         }
-        
+
         [HttpGet("{id}")]
         [Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get(int id)
@@ -70,6 +94,7 @@ namespace WaterUseServices.Controllers
             }
         }
         
+
         [HttpPost][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Post([FromBody]Source entity)
         {
