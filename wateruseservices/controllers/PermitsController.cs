@@ -28,7 +28,7 @@ using System.Collections.Generic;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class PermitsController : NSSControllerBase
+    public class PermitsController : WUControllerBase
     {
         private IWaterUseAgent agent;
 

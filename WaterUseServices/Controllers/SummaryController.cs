@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class SummaryController : NSSControllerBase
+    public class SummaryController : WUControllerBase
     {
         private IWaterUseAgent agent;
 

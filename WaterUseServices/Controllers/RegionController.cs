@@ -28,7 +28,7 @@ using System.Collections.Generic;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class RegionsController : NSSControllerBase
+    public class RegionsController : WUControllerBase
     {
         private IWaterUseAgent agent;
 
@@ -42,6 +42,11 @@ namespace WaterUseServices.Controllers
         {
             try
             {
+                if (User.Identity.IsAuthenticated)
+                {
+                    //only return managed regions.
+                    puke();
+                }//end if
                 return Ok(agent.Select<Region>());
             }
             catch (Exception ex)

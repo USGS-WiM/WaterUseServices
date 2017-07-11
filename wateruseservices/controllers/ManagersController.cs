@@ -32,11 +32,11 @@ using System.Linq;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class ManagerController : NSSControllerBase
+    public class ManagersController : WUControllerBase
     {
         private IWaterUseAgent agent;
 
-        public ManagerController(IWaterUseAgent sa)
+        public ManagersController(IWaterUseAgent sa)
         {
             this.agent = sa;
         }
