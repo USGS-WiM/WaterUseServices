@@ -23,10 +23,10 @@ namespace WaterUseServices.XUnitTest
 {
     public class CatagoriesTest
     {
-        public CatagoriesController controller { get; private set; }
+        public CategoriesController controller { get; private set; }
         public CatagoriesTest() {
             //Arrange
-            controller = new CatagoriesController(new InMemoryCatagoriesAgent());
+            controller = new CategoriesController(new InMemoryCatagoriesAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
 

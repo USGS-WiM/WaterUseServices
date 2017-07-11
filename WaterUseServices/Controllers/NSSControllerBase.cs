@@ -14,17 +14,32 @@ namespace WaterUseServices.Controllers
     {
         public bool IsAuthorizedToEdit(string OwnerUserName)
         {
-            var username = User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier)
-                   .Select(c => c.Value).SingleOrDefault();
 
+            if (User.IsInRole("Administrator")) return true;
+
+            var username = LoggedInUser().Username;
             if (!string.IsNullOrEmpty(username) && 
-                string.Equals(OwnerUserName, username, StringComparison.OrdinalIgnoreCase) &&
-                (User.IsInRole("Manager")||User.IsInRole("Administrator")))
+                string.Equals(OwnerUserName, username, StringComparison.OrdinalIgnoreCase))
                 return true;
+
 
             return false;
         }
-
+        public Manager LoggedInUser() {
+            return new Manager()
+            {
+                ID = Convert.ToInt32( User.Claims.Where(c => c.Type == ClaimTypes.PrimarySid)
+                   .Select(c => c.Value).SingleOrDefault()),
+                FirstName = User.Claims.Where(c => c.Type == ClaimTypes.Name)
+                   .Select(c => c.Value).SingleOrDefault(),
+                LastName = User.Claims.Where(c => c.Type == ClaimTypes.Surname)
+                   .Select(c => c.Value).SingleOrDefault(),
+                Username = User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier)
+                   .Select(c => c.Value).SingleOrDefault(),
+                 RoleID = Convert.ToInt32(User.Claims.Where(c => c.Type == ClaimTypes.Anonymous)
+                   .Select(c => c.Value).SingleOrDefault())
+            };
+        }
         protected List<string> parse(string items)
         {
             if (items == null) items = string.Empty;
@@ -75,7 +90,7 @@ namespace WaterUseServices.Controllers
             {23505, "One of the properties is marked as Unique index and there is already an entry with that value."},
             {23503, "One of the related parameters are not available in the db." }
         };
-        private struct Error
+        protected struct Error
         {
             public int Code { get; private set; }
             public string Message { get; private set; }

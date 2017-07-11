@@ -9,6 +9,8 @@ using System;
 using WaterUseDB;
 using WaterUseAgent;
 using WaterUseServices.Security.Authentication.Basic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace WaterUseServices
 {
@@ -48,11 +50,13 @@ namespace WaterUseServices
                                                                  .AllowAnyHeader()
                                                                  .AllowCredentials());
             });
-            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true;})
+            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true; })
                                 .AddXmlSerializerFormatters()
-                                .AddXmlDataContractSeria‌​lizerFormatters();
+                                .AddXmlDataContractSeria‌​lizerFormatters()
+                                .AddJsonOptions(options => loadJsonOptions(options));
+        }
 
-        }       
+     
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -78,7 +82,20 @@ namespace WaterUseServices
                 "AdminOnly",
                 policy => policy.RequireRole("Administrator"));
         }
-
+        private void loadJsonOptions(MvcJsonOptions options)
+        {
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            options.SerializerSettings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore;
+            options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            options.SerializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None;
+            options.SerializerSettings.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
+            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
+        }
+        private void ConfigureRoute(IRouteBuilder routeBuilder)
+        {
+            //login
+            //routeBuilder.MapRoute("login", "{controller = Manager}/{action = GetLoggedInUser}");
+        }
         #endregion
 
 
