@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace WaterUseServices.Controllers
 {
 
-    public abstract class NSSControllerBase: Controller
+    public abstract class WUControllerBase: Controller
     {
         public bool IsAuthorizedToEdit(string OwnerUserName)
         {

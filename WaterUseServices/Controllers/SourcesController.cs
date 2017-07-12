@@ -30,7 +30,7 @@ using Microsoft.EntityFrameworkCore;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class SourcesController : NSSControllerBase
+    public class SourcesController : WUControllerBase
     {
         private IWaterUseAgent agent;
 

@@ -11,7 +11,7 @@
 //    authors:  Jeremy K. Newson USGS Web Informatics and Mapping
 //              
 //  
-//   purpose:   
+//   purpose:   Handle Basic Authentication. !important, Should be used with HTTPS
 //
 //discussion:   Authentication is the process of determining who you are, while Authorisation 
 //              evolves around what you are allowed to do, i.e. permissions. Obviously before 
