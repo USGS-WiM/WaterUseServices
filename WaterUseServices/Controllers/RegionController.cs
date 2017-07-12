@@ -24,6 +24,8 @@ using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace WaterUseServices.Controllers
 {
@@ -42,12 +44,19 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (User.Identity.IsAuthenticated)
+                var query = agent.Select<Region>();
+                if (User.Identity.IsAuthenticated && !User.IsInRole("Administrator"))
                 {
-                    //only return managed regions.
-                    puke();
+                    query = query.Include(r => r.RegionManagers).Where(r => r.RegionManagers
+                                    .Any(rm => rm.ManagerID == LoggedInUser().ID)).Select(r => new Region()
+                                                                                        {
+                                                                                            Description = r.Description,
+                                                                                            ID =r.ID,
+                                                                                            Name = r.Name,
+                                                                                            ShortName = r.ShortName
+                                                                                        });
                 }//end if
-                return Ok(agent.Select<Region>());
+                return Ok(query);
             }
             catch (Exception ex)
             {
