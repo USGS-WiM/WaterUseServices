@@ -39,7 +39,9 @@ namespace WaterUseServices
             // Add framework services.
             services.AddDbContext<WaterUseDBContext>(options=>
                                                         options.UseNpgsql(String.Format(Configuration
-                                                            .GetConnectionString("WaterUseConnection"),Configuration["dbuser"], Configuration["dbpassword"], Configuration["dbHost"]))
+                                                            .GetConnectionString("WaterUseConnection"),Configuration["dbuser"], Configuration["dbpassword"], Configuration["dbHost"]),
+                                                            //default is 1000, if > maxbatch, then EF will group requests in maxbatch size
+                                                            opt=> opt.MaxBatchSize(1000))
                                                             .EnableSensitiveDataLogging());
 
             services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();

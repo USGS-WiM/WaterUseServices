@@ -6,22 +6,33 @@ using WaterUseDB.Resources;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using WaterUseAgent;
 
 namespace WaterUseServices.Controllers
 {
 
     public abstract class WUControllerBase: Controller
     {
-        public bool IsAuthorizedToEdit(string OwnerUserName)
+        protected IWaterUseAgent agent;
+
+        public WUControllerBase(IWaterUseAgent sa)
+        {
+            this.agent = sa;
+        }
+        public bool IsAuthorizedToEdit<T> () where T:class
         {
 
             if (User.IsInRole("Administrator")) return true;
 
-            var username = LoggedInUser().Username;
-            if (!string.IsNullOrEmpty(username) && 
-                string.Equals(OwnerUserName, username, StringComparison.OrdinalIgnoreCase))
-                return true;
+            var username = LoggedInUser();
 
+            switch (typeof(T).Name)
+            {
+                case "Source":
+
+                default:
+                    break;
+            }
 
             return false;
         }
@@ -69,17 +80,17 @@ namespace WaterUseServices.Controllers
                 string errorText;
                 if (ex.InnerException is Npgsql.PostgresException && dbBadRequestErrors.TryGetValue(Convert.ToInt32(ex.InnerException.Data["Code"]), out errorText))
                 {
-                    return new BadRequestObjectResult(new Error(400, errorText));
+                    return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, errorText));
                 }
                 else
                 {
-                    return StatusCode(500, new Error(500, "A managed database error occured."));
+                    return StatusCode(500, new Error(errorEnum.e_internalError, "A managed database error occured."));
                 }
             }
 
             else
             {
-                return StatusCode(500, new Error(-999, "An error occured while processing your request."));
+                return StatusCode(500, new Error(errorEnum.e_internalError, "An error occured while processing your request."));
             }
         }
 
@@ -96,24 +107,52 @@ namespace WaterUseServices.Controllers
             public string Message { get; private set; }
             public string Content { get; private set; }
 
-            public Error(int c, string msg) {
-                this.Code = c;
+            public Error(errorEnum c, string msg) {
+                this.Code = (int)c;
                 this.Message = msg;
                 this.Content = getContent(c);
             }
+            public Error(errorEnum c)
+            {
+                this.Code = (int)c;
+                this.Message = getDefaultmsg(c);
+                this.Content = getContent(c);
+            }
 
-            private static string getContent(Int32 code) {
+            private static string getContent(errorEnum code) {
                 switch (code)
                 {
-                    case 400: return "Bad Request Received";
-                    case 500: return "Internal Server Error Occured";
+                    case errorEnum.e_badRequest: return "Bad Request Received";
+                    case errorEnum.e_notFound: return "Not Found";
+                    case errorEnum.e_notAllowed: return "Method Not Allowed.";
+                    case errorEnum.e_internalError: return "Internal Server Error Occured";
+                    default: return "Error not specified";                        
+                }
+
+            }
+            private static string getDefaultmsg(errorEnum code)
+            {
+                switch (code)
+                {
+                    case errorEnum.e_badRequest: return "Object is invalid, please check you have populated all required properties and try again.";
+                    case errorEnum.e_notFound: return "Object was not found.";
+                    case errorEnum.e_notAllowed: return "Method not allowed.";
+                    case errorEnum.e_internalError: return "Internal server error occured";
                     default: return "Error not specified";
-                        
+
                 }
 
             }
 
 
+        }
+        protected enum errorEnum
+        {
+            e_badRequest=400,
+            e_notFound=404,
+            e_notAllowed=405,
+            e_internalError=500,
+            e_error=0
         }
     }
 }

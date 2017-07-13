@@ -30,12 +30,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class SourceTypesController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public SourceTypesController(IWaterUseAgent sa)
-        {
-            this.agent = sa;
-        }
+        public SourceTypesController(IWaterUseAgent sa):base(sa)
+        { }
         #region METHODS
         [HttpGet]
         public async Task<IActionResult> Get()

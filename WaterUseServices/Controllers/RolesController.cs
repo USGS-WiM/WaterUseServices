@@ -30,11 +30,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class RolesController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public RolesController(IWaterUseAgent sa) {
-            this.agent = sa;
-        }
+        public RolesController(IWaterUseAgent sa) : base(sa)
+        {}
         #region METHODS
         [HttpGet][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get()
