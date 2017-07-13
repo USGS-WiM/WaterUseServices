@@ -53,6 +53,20 @@ namespace WaterUseAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
         public Domestic DomesticUse { private get; set; }
+        private bool _includeReturns = false;
+        private IQueryable<CatagoryCoefficient> CatagoryCoeff = null;
+        public bool IncludeReturns
+        {
+            set {
+                if(value != _includeReturns)
+                {
+                    _includeReturns = value;
+                    if (_includeReturns) CatagoryCoeff = Select<CatagoryCoefficient>();
+                    else CatagoryCoeff = null;
+                }
+            }
+        }
+
 
         public WaterUseServiceAgent(WaterUseDBContext context) : base(context) {
 
@@ -199,6 +213,7 @@ namespace WaterUseAgent
             List<Source> sourceList = null;
             try
             {
+
                 if (IncludePermittedWithdrawals) sources = sources.Include(s => s.Permits).Include("Permits.UnitType");
                 sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
                 
@@ -207,7 +222,7 @@ namespace WaterUseAgent
                     ProcessDate = DateTime.Now,
                     StartYear = startyear,
                     EndYear = endyear,
-                    Return = getWaterUseReturns(sourceList.Where(s => s.SourceType.Code == "SW").ToList(), startyear, endyear),
+                    Return = CatagoryCoeff.Count() > 0 ? getWaterUseReturns(sourceList.ToList(), startyear, endyear) : null,
                     Withdrawal = getWaterUseWithdrawals(sourceList.ToList(), startyear, endyear)
                 };
             }   
@@ -231,7 +246,7 @@ namespace WaterUseAgent
                                 ProcessDate = DateTime.Now,
                                 StartYear = startyear,
                                 EndYear = endyear,
-                                Return = getWaterUseReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear),
+                                Return = CatagoryCoeff.Count() > 0? getWaterUseReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear):null,
                                 Withdrawal = getWaterUseWithdrawals(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear)
                         });
 

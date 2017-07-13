@@ -31,11 +31,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class UnitsController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public UnitsController(IWaterUseAgent sa) {
-            this.agent = sa;
-        }
+        public UnitsController(IWaterUseAgent sa) : base(sa)
+        { }
 
         #region METHOD
         [HttpGet]

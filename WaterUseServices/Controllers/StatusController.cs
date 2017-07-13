@@ -31,11 +31,9 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class StatusController : WUControllerBase
     {
-        private IWaterUseAgent agent;
+        public StatusController(IWaterUseAgent sa) : base(sa)
+        { }
 
-        public StatusController(IWaterUseAgent sa) {
-            this.agent = sa;
-        }
         #region METHODS
         [HttpGet]
         public async Task<IActionResult> Get()

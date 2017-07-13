@@ -34,12 +34,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class ManagersController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public ManagersController(IWaterUseAgent sa)
-        {
-            this.agent = sa;
-        }
+        public ManagersController(IWaterUseAgent sa) : base(sa)
+        {}
         #region METHODS
         [HttpGet][Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Get()
@@ -107,7 +103,7 @@ namespace WaterUseServices.Controllers
             {
                 if(string.IsNullOrEmpty(entity.FirstName)|| string.IsNullOrEmpty(entity.LastName) || 
                     string.IsNullOrEmpty(entity.Username)|| string.IsNullOrEmpty(entity.Email) ||
-                    entity.RoleID <1) return new BadRequestObjectResult(new Error(404, "You are missing one or more required parameter.")); // This returns HTTP 404
+                    entity.RoleID <1) return new BadRequestObjectResult(new Error( errorEnum.e_badRequest, "You are missing one or more required parameter.")); // This returns HTTP 404
 
                 if (string.IsNullOrEmpty(entity.Password))
                     entity.Password = generateDefaultPassword(entity);
@@ -139,13 +135,13 @@ namespace WaterUseServices.Controllers
             {
                 if (string.IsNullOrEmpty(entity.FirstName) || string.IsNullOrEmpty(entity.LastName) ||
                     string.IsNullOrEmpty(entity.Username) || string.IsNullOrEmpty(entity.Email) ||
-                    entity.RoleID < 1) return new BadRequestObjectResult(new Error(404, "You are missing one or more required parameter.")); // This returns HTTP 404
+                    entity.RoleID < 1) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 404
 
                 //fetch object, assuming it exists
                 ObjectToBeUpdated = await agent.Find<Manager>(id);
                 if (ObjectToBeUpdated == null) return new NotFoundObjectResult(entity);
 
-                if (!IsAuthorizedToEdit(entity.Username))
+                if (!User.IsInRole("Administrator")|| LoggedInUser().ID !=id)
                     return new UnauthorizedResult();// return HTTP 401
 
                 ObjectToBeUpdated.FirstName = entity.FirstName;

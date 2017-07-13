@@ -21,10 +21,10 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WaterUseServices.XUnitTest
 {
-    public class Roles
+    public class RolesTest
     {
         public RolesController controller { get; private set; }
-        public Roles() {
+        public RolesTest() {
             //Arrange
             controller = new RolesController(new InMemoryRolesAgent());
             //must set explicitly for tests to work

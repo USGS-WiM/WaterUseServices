@@ -24,52 +24,69 @@ using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
     public class PermitsController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public PermitsController(IWaterUseAgent sa) {
-            this.agent = sa;
-        }
+        public PermitsController(IWaterUseAgent sa) : base(sa)
+        {}
         #region METHODS
-        [HttpGet][Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Get()
+        [HttpGet("/Sources/{sourceID}/[controller]")]
+        [Authorize(Policy = "Restricted")]
+        public async Task<IActionResult> GetSourcePermit(int sourceID)
         {
             try
             {
-                return Ok(agent.Select<Permit>());   
-            }
-            catch (Exception ex)
-            {
-                return await HandleExceptionAsync(ex);
-            }                 
-        }
-        
-        [HttpGet("{id}")][Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Get(int id)
-        {
-            try
-            {
-                if(id<0) return new BadRequestResult(); // This returns HTTP 404
+                if (sourceID < 1) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
 
-                return Ok(await agent.Find<Permit>(id));
+                var ObjectRequested = agent.Select<Source>().Include(s => s.Region)
+                                            .ThenInclude(s => s.RegionManagers).Include(s => s.Permits).FirstOrDefault(x => x.ID == sourceID);
+
+                if (ObjectRequested == null) return new BadRequestObjectResult(new Error(errorEnum.e_notFound)); // This returns HTTP 400 
+
+                if (ObjectRequested.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+
+                return Ok(ObjectRequested.Permits.Select(p=>new Permit(){ EndDate= p.EndDate,
+                                                                        ID = p.ID,
+                                                                        IntakeCapacity =p.IntakeCapacity,
+                                                                        PermitNO = p.PermitNO,
+                                                                        SourceID = p.SourceID,
+                                                                        StartDate = p.StartDate,
+                                                                        StatusTypeID = p.StatusTypeID,
+                                                                        UnitTypeID =p.UnitTypeID,
+                                                                        WellCapacity = p.WellCapacity}));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-            }            
+            }
         }
-      
-        [HttpPost][Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Post([FromBody]Permit entity)
+
+        [HttpPost("/Sources/{sourceID}/[controller]")]
+        [Authorize(Policy = "Restricted")]
+        public async Task<IActionResult> Post(int sourceID, [FromBody]Permit entity)
         {
             try
             {
-                if (!isValid(entity)) return new BadRequestResult();
+                if (sourceID < 1) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
+
+                var ObjectSource = agent.Select<Source>().Include(s => s.Region)
+                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == sourceID);
+
+                if (ObjectSource == null) return new BadRequestObjectResult(new Error(errorEnum.e_notFound,"Source not found.")); // This returns HTTP 400 
+
+                if (ObjectSource.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+                entity.SourceID = ObjectSource.ID;
+
+                if (!isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_notFound));
 
                 return Ok(await agent.Add<Permit>(entity));
             }
@@ -79,28 +96,19 @@ namespace WaterUseServices.Controllers
             }            
         }
 
-        [HttpPost][Authorize(Policy = "Restricted")]
-        [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<Permit> entities)
-        {
-            try
-            {
-                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
-
-                return Ok(await agent.Add<Permit>(entities));
-            }
-            catch (Exception ex)
-            {
-                return await HandleExceptionAsync(ex);
-            }
-        }
-
         [HttpPut("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Put(int id, [FromBody]Permit entity)
         {
             try
             {
+                var ObjectToBeUpdated = agent.Select<Permit>().Include(p=>p.Source.Region.RegionManagers)
+                                            .FirstOrDefault(x => x.ID == id);
+
+                if (ObjectToBeUpdated.Source.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
                 if (!isValid(entity) || id < 1) return new BadRequestResult();
+
                 return Ok(await agent.Update<Permit>(id,entity));
             }
             catch (Exception ex)
@@ -115,8 +123,16 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entityToDelete = await agent.Find<Permit>(id);
+
+                var entityToDelete = agent.Select<Permit>().Include(p => p.Source.Region.RegionManagers)
+                                            .FirstOrDefault(x => x.ID == id);
+
                 if (entityToDelete == null) return new BadRequestResult();
+
+                if (entityToDelete.Source.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+                
 
                 await agent.Delete<Permit>(entityToDelete);
                 return Ok();

@@ -31,11 +31,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class SummaryController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public SummaryController(IWaterUseAgent sa) {
-            this.agent = sa;
-        }
+        public SummaryController(IWaterUseAgent sa) : base(sa)
+        { }
 
         #region METHOD
         [HttpPost][HttpGet]

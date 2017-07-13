@@ -32,12 +32,8 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class SourcesController : WUControllerBase
     {
-        private IWaterUseAgent agent;
-
-        public SourcesController(IWaterUseAgent sa)
-        {
-            this.agent = sa;
-        }
+        public SourcesController(IWaterUseAgent sa):base(sa)
+        {}
         #region METHODS
         [HttpGet]
         [Authorize(Policy = "Restricted")]
@@ -50,14 +46,15 @@ namespace WaterUseServices.Controllers
 
                 if (!User.IsInRole("Administrator"))
                 {
-                    //get logged in users ID
+                    //only return sources user has access to.
                     Int32 ID = LoggedInUser().ID;
-                    if(ID < 1) return new BadRequestResult(); // This returns HTTP 404
+                    if(ID < 1) return new UnauthorizedResult();
                     query = query.Include(s => s.Region).ThenInclude(s=>s.RegionManagers).Where(s=>s.Region.RegionManagers.Any(rm=>rm.ManagerID == ID));
                 }//end if
 
                 if (RegionID.HasValue)
                     query = query.Where(s => s.RegionID == RegionID);
+
                 return Ok(query.Select(s => new Source()
                                                 {
                                                     ID = s.ID,
@@ -67,7 +64,8 @@ namespace WaterUseServices.Controllers
                                                     Name = s.Name,
                                                     RegionID = s.RegionID,
                                                     SourceTypeID = s.SourceTypeID,
-                                                    StationID = s.StationID
+                                                    StationID = s.StationID,
+                                                    Location = s.Location
                                                 }));
             }
             catch (Exception ex)
@@ -82,25 +80,49 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 0) return new BadRequestResult(); // This returns HTTP 404
+                if (id < 0) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
+               
 
-                var x = await agent.Find<Source>(id);
+                var ObjectRequested = agent.Select<Source>().Include(s => s.Region)
+                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
 
-                return Ok(x);
+                if(ObjectRequested == null) return new BadRequestObjectResult(new Error(errorEnum.e_notFound)); // This returns HTTP 400 
+
+                if (ObjectRequested.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+                return Ok(new Source()
+                {
+                    ID = ObjectRequested.ID,
+                    CatagoryTypeID = ObjectRequested.CatagoryTypeID,
+                    FacilityCode = ObjectRequested.FacilityCode,
+                    FacilityName = ObjectRequested.FacilityName,
+                    Name = ObjectRequested.Name,
+                    RegionID = ObjectRequested.RegionID,
+                    SourceTypeID = ObjectRequested.SourceTypeID,
+                    StationID = ObjectRequested.StationID,
+                    Location = ObjectRequested.Location
+                });
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
-        }
-        
+        }       
 
         [HttpPost][Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Post([FromBody]Source entity)
         {
             try
             {
-                if (!isValid(entity)) return new BadRequestResult();
+                //verify user can submit to region
+                if (!User.IsInRole("Administrator") || !agent.Select<RegionManager>()
+                                                            .Where(rm => rm.ManagerID == LoggedInUser().ID)
+                                                            .Select(i => i.RegionID).Contains(entity.RegionID))
+                    return new UnauthorizedResult();
+
+
+                if (!isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
                 return Ok(await agent.Add<Source>(entity));
             }
             catch (Exception ex)
@@ -109,12 +131,18 @@ namespace WaterUseServices.Controllers
             }
         }
 
-        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [HttpPost][Authorize(Policy = "Restricted")]
         [Route("Batch")]
         public async Task<IActionResult> Batch([FromBody]List<Source> entities)
         {
             try
-            {
+            {              
+                //verify user can submit to region
+                if (!User.IsInRole("Administrator") && !entities.Select(x => x.RegionID).All(rid =>
+                                        agent.Select<Manager>().Include(m => m.RegionManagers).Where(rm => rm.ID == LoggedInUser().ID)
+                                                            .SelectMany(i => i.RegionManagers.Select(rm => rm.RegionID)).Contains(rid)))
+                    return new UnauthorizedResult();
+
                 if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
 
                 return Ok(await agent.Add<Source>(entities));
@@ -130,14 +158,23 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                var ObjectToBeUpdated = agent.Select<Source>().Include(s => s.Region)
+                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
+
+                if (ObjectToBeUpdated.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+                if (!User.IsInRole("Administrator"))
+                    //only admin can change region
+                   entity.RegionID = ObjectToBeUpdated.RegionID;           
+
+                if (id < 0 || !isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
                 return Ok(await agent.Update<Source>(id, entity));
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
-
         }
         
         [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
@@ -146,9 +183,17 @@ namespace WaterUseServices.Controllers
             try
             {
 
-                if (id < 1) return new BadRequestResult();
+                if (id < 1) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "invalid id"));
+
+                var ObjectToBeDeleted = agent.Select<Source>().Include(s => s.Region)
+                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
+
+                if (ObjectToBeDeleted.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                    return new UnauthorizedResult();
+
+
                 var entity = await agent.Find<Source>(id);
-                if (entity == null) return new BadRequestResult();
+                if (entity == null) return new NotFoundObjectResult(new Error());
                 await agent.Delete<Source>(entity);
 
                 return Ok();
