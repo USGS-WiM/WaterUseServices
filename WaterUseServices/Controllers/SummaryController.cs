@@ -36,15 +36,16 @@ namespace WaterUseServices.Controllers
 
         #region METHOD
         [HttpPost][HttpGet]
-        public async Task<IActionResult> Get([FromQuery] Int32 year, [FromQuery]Int32? endyear = null, [FromBody] object basin = null, 
+        public async Task<IActionResult> Get([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null, 
                                                 [FromQuery]string sources = "",[FromQuery]bool includePermits = false, 
-                                                [FromQuery]double? domesticGW = null, [FromQuery]double? domesticSW = null)
+                                                [FromQuery]double? domesticGW = null,[FromQuery]double? domesticSW = null)
         {
             try
             {
                 if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
+
                 if (domesticGW.HasValue || domesticSW.HasValue)
                     agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW };
 
@@ -66,16 +67,16 @@ namespace WaterUseServices.Controllers
         [HttpPost][HttpGet]
         [Authorize(Policy = "Restricted")]
         [Route("BySource")]
-        public async Task<IActionResult> BySource([FromQuery] Int32 year, [FromQuery]Int32? endyear = null, [FromBody] object basin = null,
+        public async Task<IActionResult> BySource([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null,
                                                     [FromQuery]string sources = "",[FromQuery]bool includePermits = false,
-                                                    [FromQuery]double? domesticGW = null, [FromQuery]double? domesticSW = null)
+                                                    [FromQuery]double? domesticGW = null,[FromQuery]double? domesticSW = null)
         {
             try
             {
                 if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
-                if (includePermits)
-                    agent.IncludePermittedWithdrawals = includePermits;
+                if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
+
                 if (domesticGW.HasValue || domesticSW.HasValue)
                     agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW }; 
 

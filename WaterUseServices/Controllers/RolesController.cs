@@ -112,7 +112,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 1) return new BadRequestResult();
                 var role = await agent.Find<Role>(id);
-                if (role == null) return new BadRequestResult();
+                if (role == null) return new NotFoundResult();
 
                 await agent.Delete<Role>(role);
                 return Ok();

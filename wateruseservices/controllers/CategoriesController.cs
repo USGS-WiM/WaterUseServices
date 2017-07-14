@@ -115,7 +115,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 1) return new BadRequestResult();
                 var entity = await agent.Find<CatagoryType>(id);
-                if (entity == null) return new BadRequestResult();
+                if (entity == null) return new NotFoundResult();
 
                 await agent.Delete<CatagoryType>(entity);
 

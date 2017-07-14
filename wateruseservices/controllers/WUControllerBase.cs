@@ -99,7 +99,7 @@ namespace WaterUseServices.Controllers
             //https://www.postgresql.org/docs/9.4/static/errcodes-appendix.html
             {23502, "One of the properties requires a value."},
             {23505, "One of the properties is marked as Unique index and there is already an entry with that value."},
-            {23503, "One of the related parameters are not available in the db." }
+            {23503, "One of the related parameters prevents you from performing this operation in the database." }
         };
         protected struct Error
         {
@@ -126,6 +126,7 @@ namespace WaterUseServices.Controllers
                     case errorEnum.e_notFound: return "Not Found";
                     case errorEnum.e_notAllowed: return "Method Not Allowed.";
                     case errorEnum.e_internalError: return "Internal Server Error Occured";
+                    case errorEnum.e_unauthorize: return "Unauthorized";
                     default: return "Error not specified";                        
                 }
 
@@ -138,6 +139,7 @@ namespace WaterUseServices.Controllers
                     case errorEnum.e_notFound: return "Object was not found.";
                     case errorEnum.e_notAllowed: return "Method not allowed.";
                     case errorEnum.e_internalError: return "Internal server error occured";
+                    case errorEnum.e_unauthorize: return "Unauthorized to perform this action.";
                     default: return "Error not specified";
 
                 }
@@ -149,6 +151,7 @@ namespace WaterUseServices.Controllers
         protected enum errorEnum
         {
             e_badRequest=400,
+            e_unauthorize =401,
             e_notFound=404,
             e_notAllowed=405,
             e_internalError=500,

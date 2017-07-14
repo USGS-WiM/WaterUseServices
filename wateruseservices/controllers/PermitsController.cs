@@ -127,7 +127,7 @@ namespace WaterUseServices.Controllers
                 var entityToDelete = agent.Select<Permit>().Include(p => p.Source.Region.RegionManagers)
                                             .FirstOrDefault(x => x.ID == id);
 
-                if (entityToDelete == null) return new BadRequestResult();
+                if (entityToDelete == null) return new NotFoundResult();
 
                 if (entityToDelete.Source.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
                     return new UnauthorizedResult();

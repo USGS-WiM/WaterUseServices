@@ -116,9 +116,9 @@ namespace WaterUseServices.Controllers
             try
             {
                 //verify user can submit to region
-                if (!User.IsInRole("Administrator") || !agent.Select<RegionManager>()
-                                                            .Where(rm => rm.ManagerID == LoggedInUser().ID)
-                                                            .Select(i => i.RegionID).Contains(entity.RegionID))
+                if (!User.IsInRole("Administrator") && !agent.Select<Manager>().Include(m=>m.RegionManagers)
+                                                            .Where(m => m.ID == LoggedInUser().ID)
+                                                            .Any(m => m.RegionManagers.Select(rm=>rm.RegionID).Contains(entity.RegionID)))
                     return new UnauthorizedResult();
 
 

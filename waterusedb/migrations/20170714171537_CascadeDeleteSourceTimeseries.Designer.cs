@@ -9,9 +9,10 @@ using NpgsqlTypes;
 namespace WaterUseDB.Migrations
 {
     [DbContext(typeof(WaterUseDBContext))]
-    partial class WaterUseDBContextModelSnapshot : ModelSnapshot
+    [Migration("20170714171537_CascadeDeleteSourceTimeseries")]
+    partial class CascadeDeleteSourceTimeseries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)

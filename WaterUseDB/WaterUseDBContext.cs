@@ -23,12 +23,14 @@
 
 using Microsoft.EntityFrameworkCore;
 using WaterUseDB.Resources;
+using Microsoft.EntityFrameworkCore.Metadata;
 //specifying the data provider and connection string
 namespace WaterUseDB
 {
     public class WaterUseDBContext:DbContext
     {
         public DbSet<CatagoryType> CatagoryTypes { get; set; }
+        public DbSet<CatagoryCoefficient> CatagoryCoefficients { get; set; }
         public DbSet<Manager> Managers { get; set; }
         public DbSet<Permit> Permits { get; set; }
         public DbSet<Region> Regions { get; set; }
@@ -66,11 +68,18 @@ namespace WaterUseDB
                 //modelBuilder.Entity(entitytype.Name).Property<DateTime>("LastModified");
             }//next entitytype
 
+            //cascade delete
+            modelBuilder.Entity<TimeSeries>()
+                .HasOne(ts=>ts.Source)
+                .WithMany(s => s.TimeSeries)             
+                .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);             
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #warning Add connectionstring for migrations
+            var connectionstring = "";
             //optionsBuilder.UseNpgsql(connectionstring);
         }
     }

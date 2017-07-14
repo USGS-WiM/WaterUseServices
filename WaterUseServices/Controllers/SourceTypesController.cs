@@ -97,7 +97,7 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                if (id < 1 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 return Ok(await agent.Update<SourceType>(id, entity));
             }
             catch (Exception ex)
@@ -115,7 +115,7 @@ namespace WaterUseServices.Controllers
 
                 if (id < 1) return new BadRequestResult();
                 var entity = await agent.Find<SourceType>(id);
-                if (entity == null) return new BadRequestResult();
+                if (entity == null) return new NotFoundResult();
                 await agent.Delete<SourceType>(entity);
 
                 return Ok();

@@ -66,7 +66,7 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 0) return new BadRequestResult(); // This returns HTTP 404
+                if (id < 1) return new BadRequestResult();
 
                 return Ok(await agent.Find<Region>(id));
             }
@@ -111,7 +111,7 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                if (id < 1 || !isValid(entity)) return new BadRequestResult();
                 return Ok(await agent.Update<Region>(id, entity));
             }
             catch (Exception ex)
@@ -129,7 +129,7 @@ namespace WaterUseServices.Controllers
 
                 if (id < 1) return new BadRequestResult();
                 var entity = await agent.Find<Region>(id);
-                if (entity == null) return new BadRequestResult();
+                if (entity == null) return new NotFoundResult();
                 await agent.Delete<Region>(entity);
 
                 return Ok();
