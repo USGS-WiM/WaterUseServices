@@ -71,9 +71,7 @@ namespace WaterUseServices.Controllers
         [Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Batch(int regionID, [FromBody]List<FCTimeSeries> entities)
         {
-            List<string> msg = new List<string>();
-            List<TimeSeries> tsToAdd = new List<TimeSeries>();
-            Dictionary<int, Error> msgs;
+            Dictionary<int, Error> msgs = new Dictionary<int, Error>();
             try
             {
                 var entityFClist = entities.Select(e => e.FacilityCode).ToList();
@@ -81,7 +79,8 @@ namespace WaterUseServices.Controllers
                                         .Include("Region.RegionManagers").ToList();
 
 
-                if (!isValid(entities, regionSources, out msgs)) return new BadRequestObjectResult(msg);
+                if (!isValid(entities, regionSources, ref msgs))
+                    return new BadRequestObjectResult(msgs);
 
                 List<TimeSeries> items = entities.Select(ts => new TimeSeries()
                 {
@@ -137,9 +136,8 @@ namespace WaterUseServices.Controllers
         }
         #endregion
         #region HELPER METHODS
-        protected bool isValid(List<FCTimeSeries> items, List<Source> sources, out Dictionary<int, Error> msgs)
+        protected bool isValid(List<FCTimeSeries> items, List<Source> sources, ref Dictionary<int, Error> msgs)
         {
-            msgs = new Dictionary<int, Error>();
             
             var loggedInManager = LoggedInUser();
             bool isOK = true;
