@@ -131,19 +131,23 @@ namespace WaterUseServices.Controllers
             }
         }
 
+        [HttpPost("/Regions/{regionID}/[controller]/Batch")]
         [HttpPost][Authorize(Policy = "Restricted")]
         [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<Source> entities)
+        public async Task<IActionResult> Batch([FromBody]List<Source> entities, Int32? regionID = null)
         {
             try
-            {              
+            {
+                if (regionID.HasValue)
+                    entities.ForEach(e => e.RegionID = regionID.Value);
+
                 //verify user can submit to region
                 if (!User.IsInRole("Administrator") && !entities.Select(x => x.RegionID).All(rid =>
                                         agent.Select<Manager>().Include(m => m.RegionManagers).Where(rm => rm.ID == LoggedInUser().ID)
                                                             .SelectMany(i => i.RegionManagers.Select(rm => rm.RegionID)).Contains(rid)))
                     return new UnauthorizedResult();
 
-                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+                if (!isValid(entities)) return new BadRequestObjectResult("One or more object parameters are invalid.");
 
                 return Ok(await agent.Add<Source>(entities));
             }
