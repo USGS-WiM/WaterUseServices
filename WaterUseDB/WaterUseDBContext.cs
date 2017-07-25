@@ -68,11 +68,40 @@ namespace WaterUseDB
                 //modelBuilder.Entity(entitytype.Name).Property<DateTime>("LastModified");
             }//next entitytype
 
-            //cascade delete
-            modelBuilder.Entity<TimeSeries>()
-                .HasOne(ts=>ts.Source)
-                .WithMany(s => s.TimeSeries)             
-                .OnDelete(DeleteBehavior.Cascade);
+            //cascade delete is default, rewrite behavior
+            modelBuilder.Entity("WaterUseDB.Resources.CatagoryCoefficient", b =>
+            {
+                b.HasOne("WaterUseDB.Resources.CatagoryType", "CatagoryType")
+                    .WithMany()
+                    .HasForeignKey("CatagoryTypeID")
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity("WaterUseDB.Resources.Manager", b =>
+            {
+                b.HasOne("WaterUseDB.Resources.Role", "Role")
+                    .WithMany()
+                    .HasForeignKey("RoleID")
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity("WaterUseDB.Resources.Source", b =>
+                {
+                    b.HasOne("WaterUseDB.Resources.Region", "Region")
+                        .WithMany("Sources")
+                        .HasForeignKey("RegionID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("WaterUseDB.Resources.SourceType", "SourceType")
+                        .WithMany()
+                        .HasForeignKey("SourceTypeID")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+            modelBuilder.Entity("WaterUseDB.Resources.TimeSeries", b =>
+            {
+                b.HasOne("WaterUseDB.Resources.UnitType", "UnitType")
+                    .WithMany()
+                    .HasForeignKey("UnitTypeID")
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
             base.OnModelCreating(modelBuilder);             
         }

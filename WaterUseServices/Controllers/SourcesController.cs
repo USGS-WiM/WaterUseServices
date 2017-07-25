@@ -132,12 +132,16 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPost("/Regions/{regionID}/[controller]/Batch")]
-        [HttpPost][Authorize(Policy = "Restricted")]
+        [HttpPost]
+        [Authorize(Policy = "Restricted")]
         [Route("Batch")]
         public async Task<IActionResult> Batch([FromBody]List<Source> entities, Int32? regionID = null)
         {
+            Dictionary<int, Error> msgs = new Dictionary<int, Error>();
             try
             {
+                if(entities == null || entities.Count < 1) return new BadRequestObjectResult("Request must have a valid body");
+
                 if (regionID.HasValue)
                     entities.ForEach(e => e.RegionID = regionID.Value);
 
@@ -146,8 +150,21 @@ namespace WaterUseServices.Controllers
                                         agent.Select<Manager>().Include(m => m.RegionManagers).Where(rm => rm.ID == LoggedInUser().ID)
                                                             .SelectMany(i => i.RegionManagers.Select(rm => rm.RegionID)).Contains(rid)))
                     return new UnauthorizedResult();
+                bool isOK = true;
 
-                if (!isValid(entities)) return new BadRequestObjectResult("One or more object parameters are invalid.");
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    var s = entities[i];
+                    if (!isValid(s))
+                    {
+                        msgs.Add(i, new Error(errorEnum.e_badRequest));
+                        isOK = false;
+                        continue;
+                    }//end if
+                }//next i
+
+
+                if (!isOK) return new BadRequestObjectResult(msgs);
 
                 return Ok(await agent.Add<Source>(entities));
             }

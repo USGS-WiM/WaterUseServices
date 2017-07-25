@@ -99,7 +99,7 @@ namespace WaterUseServices.Controllers
             //https://www.postgresql.org/docs/9.4/static/errcodes-appendix.html
             {23502, "One of the properties requires a value."},
             {23505, "One of the properties is marked as Unique index and there is already an entry with that value."},
-            {23503, "One of the related parameters prevents you from performing this operation in the database." }
+            {23503, "One of the related features prevents you from performing this operation to the database." }
         };
         protected struct Error
         {
