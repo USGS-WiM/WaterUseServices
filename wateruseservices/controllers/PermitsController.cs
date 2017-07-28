@@ -32,7 +32,7 @@ namespace WaterUseServices.Controllers
     [Route("[controller]")]
     public class PermitsController : WUControllerBase
     {
-        public PermitsController(IWaterUseAgent sa) : base(sa)
+        public PermitsController(IWaterUseAgent sa) : base(sa) 
         {}
         #region METHODS
         [HttpGet("/Sources/{sourceID}/[controller]")]
