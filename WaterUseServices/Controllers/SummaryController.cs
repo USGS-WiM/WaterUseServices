@@ -38,7 +38,7 @@ namespace WaterUseServices.Controllers
         [HttpPost][HttpGet]
         public async Task<IActionResult> Get([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null, 
                                                 [FromQuery]string sources = "",[FromQuery]bool includePermits = false, 
-                                                [FromQuery]double? domesticGW = null,[FromQuery]double? domesticSW = null)
+                                                [FromQuery]bool computeDomestic=false)
         {
             try
             {
@@ -46,8 +46,8 @@ namespace WaterUseServices.Controllers
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
 
-                if (domesticGW.HasValue || domesticSW.HasValue)
-                    agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW };
+                if (computeDomestic)
+                    agent.ComputeDomesticWateruse();
 
                 if (!string.IsNullOrEmpty(sources))
                 {
@@ -69,7 +69,7 @@ namespace WaterUseServices.Controllers
         [Route("BySource")]
         public async Task<IActionResult> BySource([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null,
                                                     [FromQuery]string sources = "",[FromQuery]bool includePermits = false,
-                                                    [FromQuery]double? domesticGW = null,[FromQuery]double? domesticSW = null)
+                                                    [FromQuery]bool computeDomestic = false)
         {
             try
             {
@@ -77,8 +77,8 @@ namespace WaterUseServices.Controllers
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
 
-                if (domesticGW.HasValue || domesticSW.HasValue)
-                    agent.DomesticUse = new WaterUseAgent.Resources.Domestic() { GroundWater = domesticGW, SurfaceWater = domesticSW }; 
+                if (computeDomestic)
+                    agent.ComputeDomesticWateruse();
 
                 if (!string.IsNullOrEmpty(sources))
                 {
