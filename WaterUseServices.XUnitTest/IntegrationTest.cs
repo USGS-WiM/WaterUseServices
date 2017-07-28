@@ -18,7 +18,7 @@ namespace WaterUseServices.XUnitTest
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<Startup>());
             _client = _server.CreateClient();
-            _client.BaseAddress = new Uri("http://localhost/wateruse");
+            _client.BaseAddress = new Uri("http://localhost");
         }
 
         //[Fact]

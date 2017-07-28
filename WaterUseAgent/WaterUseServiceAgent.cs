@@ -35,11 +35,12 @@ namespace WaterUseAgent
     public interface IWaterUseAgent
     {
         Boolean IncludePermittedWithdrawals {set; }
-        Domestic DomesticUse {set; }
+        void ComputeDomesticWateruse();
         IQueryable<T> Select<T>() where T : class, new();
         Task<T> Find<T>(Int32 pk) where T : class, new();
         Task<T> Add<T>(T item) where T : class, new();
         Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new();
+        Configuration RegionConfigureationAsync(int regionID);
         Task<T> Update<T>(Int32 pkId, T item) where T : class, new();
         Task Delete<T>(T item) where T : class, new();
         IQueryable<Role> GetRoles();
@@ -52,7 +53,7 @@ namespace WaterUseAgent
     public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
-        public Domestic DomesticUse { private get; set; }     
+        private Domestic DomesticUse { get; set; }     
 
         public WaterUseServiceAgent(WaterUseDBContext context) : base(context) {
 
@@ -60,6 +61,29 @@ namespace WaterUseAgent
             this.context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
+        #region Configureation
+        public Configuration RegionConfigureationAsync(int regionID)
+        {
+            try
+            {
+                var sourcequery = Select<Source>().Where(s => s.RegionID == regionID);
+
+                return new Configuration()
+                            {
+                                HasPermits = sourcequery.Any(s => s.Permits.Count > 0),
+                                HasReturns = Select<CatagoryCoefficient>().Any(cc => cc.RegionID == regionID),
+                                MaxYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Max().Year,
+                                MinYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Min().Year,
+                                Units = "MGD"
+                            };
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+        #endregion
         #region Universal
         public new IQueryable<T> Select<T>() where T : class, new()
         {
@@ -192,7 +216,18 @@ namespace WaterUseAgent
                 return null;
             }
         }
+
+        public void ComputeDomesticWateruse() {
+
+            this.DomesticUse = new Domestic()
+            {
+                GroundWater = 1.728,
+                SurfaceWater = 0.035
+            };
+        }
         #endregion
+ 
+
         #region HELPER METHODS
         private Wateruse getAggregatedWaterUse(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
         {
