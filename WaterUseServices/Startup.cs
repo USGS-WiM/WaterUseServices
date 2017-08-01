@@ -90,7 +90,7 @@ namespace WaterUseServices
             options.SerializerSettings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore;
             options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             options.SerializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None;
-            options.SerializerSettings.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
+            options.SerializerSettings.TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple;
             options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
         }
         private void ConfigureRoute(IRouteBuilder routeBuilder)

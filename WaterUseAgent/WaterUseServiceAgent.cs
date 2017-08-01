@@ -126,6 +126,7 @@ namespace WaterUseAgent
         public Manager GetManagerByUsername(string username) {
             try
             {
+
                 return this.Select<Manager>().Include(p=>p.Role).FirstOrDefault(u=>string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
             }
             catch (Exception)
