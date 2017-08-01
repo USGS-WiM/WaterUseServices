@@ -47,6 +47,7 @@ namespace WaterUseAgent
         Manager GetManagerByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
         Wateruse GetWateruse(object basin, Int32 startyear, Int32? endyear);
+        Region GetRegionByIDOrShortName(string identifier);
         IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, Int32 startyear, Int32? endyear);
         IDictionary<string,Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear);
     }
@@ -132,6 +133,25 @@ namespace WaterUseAgent
             catch (Exception)
             {
                 throw;
+            }
+
+
+        }
+        #endregion
+        #region Manager
+        public Region GetRegionByIDOrShortName(string identifier)
+        {
+            try
+            {
+
+                return  Select<Region>().FirstOrDefault(e => String.Equals(e.ID.ToString().Trim().ToLower(),
+                                                         identifier.Trim().ToLower()) || String.Equals(e.ShortName.Trim().ToLower(),
+                                                         identifier.Trim().ToLower()));
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error finding region " + ex.Message);
+                return null;
             }
 
 

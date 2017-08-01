@@ -62,13 +62,14 @@ namespace WaterUseServices.Controllers
         }
         
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(string id)
         {
             try
             {
-                if (id < 1) return new BadRequestResult();
-
-                return Ok(await agent.Find<Region>(id));
+                if (String.IsNullOrEmpty(id)) return new BadRequestResult();
+                var item = agent.GetRegionByIDOrShortName(id);
+                if (item == null) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest));
+                return Ok(item);
             }
             catch (Exception ex)
             {

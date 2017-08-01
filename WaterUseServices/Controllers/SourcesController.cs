@@ -131,19 +131,23 @@ namespace WaterUseServices.Controllers
             }
         }
 
-        [HttpPost("/Regions/{regionID}/[controller]/Batch")]
+        [HttpPost("/Regions/{region}/[controller]/Batch")]
         [HttpPost]
         [Authorize(Policy = "Restricted")]
         [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<Source> entities, Int32? regionID = null)
+        public async Task<IActionResult> Batch([FromBody]List<Source> entities, string region = "")
         {
             Dictionary<int, Error> msgs = new Dictionary<int, Error>();
             try
             {
                 if(entities == null || entities.Count < 1) return new BadRequestObjectResult("Request must have a valid body");
 
-                if (regionID.HasValue)
-                    entities.ForEach(e => e.RegionID = regionID.Value);
+                if (String.IsNullOrEmpty(region))
+                {
+                    var item = agent.GetRegionByIDOrShortName(region);
+                    if(item == null) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "No region exists with supplied ID."));
+                    entities.ForEach(e => e.RegionID = item.ID);
+                }//end if
 
                 //verify user can submit to region
                 if (!User.IsInRole("Administrator") && !entities.Select(x => x.RegionID).All(rid =>

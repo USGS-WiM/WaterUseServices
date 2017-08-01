@@ -24,7 +24,7 @@ using System;
 using WaterUseDB.Resources;
 using WaterUseAgent;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace WaterUseServices.Controllers
 {
@@ -34,14 +34,16 @@ namespace WaterUseServices.Controllers
         { }
 
         #region METHOD
-        [HttpGet("/Regions/{regionID}/Config")]
-        public async Task<IActionResult> Config(int regionID)
+        [HttpGet("/Regions/{region}/Config")]
+        public async Task<IActionResult> Config(string region)
         {
             try
             {
-                if (await agent.Find<Region>(regionID) == null)return new BadRequestObjectResult(new Error(errorEnum.e_badRequest,"No region exists with supplied ID.")); // This returns HTTP 404
+                var item = agent.GetRegionByIDOrShortName(region);
 
-                return Ok(agent.RegionConfigureationAsync(regionID));
+                if (item == null) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest,"No region exists with supplied ID.")); // This returns HTTP 404
+
+                return Ok(agent.RegionConfigureationAsync(item.ID));
             }
             catch (Exception ex)
             {
