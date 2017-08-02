@@ -142,7 +142,7 @@ namespace WaterUseServices.Controllers
             {
                 if(entities == null || entities.Count < 1) return new BadRequestObjectResult("Request must have a valid body");
 
-                if (String.IsNullOrEmpty(region))
+                if (!String.IsNullOrEmpty(region))
                 {
                     var item = agent.GetRegionByIDOrShortName(region);
                     if(item == null) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "No region exists with supplied ID."));
