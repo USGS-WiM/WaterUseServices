@@ -341,7 +341,7 @@ namespace WaterUseAgent
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value / yrspan)
                         }),
-                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.GroupBy(cd => cd.Source.CatagoryType.Code)
+                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.Where(cd=>cd.Source.CatagoryTypeID.HasValue).GroupBy(cd => cd.Source.CatagoryType.Code)
                         .ToDictionary(ky => ky.Key, cval => new WateruseValue()
                         {
                             Name = cval.First().Source.CatagoryType.Name,
