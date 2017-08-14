@@ -11,6 +11,8 @@ using WaterUseAgent;
 using WaterUseServices.Security.Authentication.Basic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Net.Http.Headers;
+using WaterUseServices.Codecs.CSV;
 
 namespace WaterUseServices
 {
@@ -37,25 +39,32 @@ namespace WaterUseServices
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddDbContext<WaterUseDBContext>(options=>
+            services.AddDbContext<WaterUseDBContext>(options =>
                                                         options.UseNpgsql(String.Format(Configuration
-                                                            .GetConnectionString("WaterUseConnection"),Configuration["dbuser"], Configuration["dbpassword"], Configuration["dbHost"]),
+                                                            .GetConnectionString("WaterUseConnection"), Configuration["dbuser"], Configuration["dbpassword"], Configuration["dbHost"]),
                                                             //default is 1000, if > maxbatch, then EF will group requests in maxbatch size
-                                                            opt=> opt.MaxBatchSize(1000))
+                                                            opt => opt.MaxBatchSize(1000))
                                                             .EnableSensitiveDataLogging());
 
             services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();
-            services.AddAuthorization(options =>loadAutorizationPolicies(options));
+            services.AddAuthorization(options => loadAutorizationPolicies(options));
             services.AddCors(options => {
                 options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
                                                                  .AllowAnyMethod()
                                                                  .AllowAnyHeader()
                                                                  .AllowCredentials());
             });
-            services.AddMvc(options => { options.RespectBrowserAcceptHeader = true; })
-                                .AddXmlSerializerFormatters()
-                                .AddXmlDataContractSeria‌​lizerFormatters()
-                                .AddJsonOptions(options => loadJsonOptions(options));
+            services.AddMvc(options =>
+            {
+                options.RespectBrowserAcceptHeader = true;
+                options.OutputFormatters.Add(new WaterUseCSVOutputFormater());
+                options.FormatterMappings.SetMediaTypeMappingForFormat("csv", MediaTypeHeaderValue.Parse("text/csv"));
+            })
+                    .AddXmlSerializerFormatters()
+                    .AddXmlDataContractSeria‌​lizerFormatters()
+                    .AddJsonOptions(options => loadJsonOptions(options));
+
+
         }
 
      

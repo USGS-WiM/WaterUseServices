@@ -282,14 +282,16 @@ namespace WaterUseAgent
                         foreach (var item in sourceList)
                         {
                             item.CatagoryTypeID = null;
-                            result.Add(item.FacilityCode, new Wateruse()
+                            var wu = new Wateruse()
                             {
                                 ProcessDate = DateTime.Now,
                                 StartYear = startyear,
                                 EndYear = endyear,
                                 Return = getWaterUseReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear),
                                 Withdrawal = getWaterUseWithdrawals(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear)
-                        });
+                            };
+                            if(wu.Return != null || wu.Withdrawal != null)
+                                result.Add(item.FacilityCode,wu);
 
                         }//next item
                         return result;
@@ -319,8 +321,8 @@ namespace WaterUseAgent
                                                                                 p.StartDate.Value.Year <= endyear.Value).ToList();
                 if (this.DomesticUse != null)
                     tslist.AddRange(getDomesticTimeseries(startyear,endyear.Value));
-               
-                
+
+                if (tslist.Count < 1) return null;
 
                 return new WateruseSummary() {
                     Annual = tslist != null && tslist.Count > 0 ? tslist.GroupBy(ts => ts.Source.SourceType.Code)
