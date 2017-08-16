@@ -53,7 +53,7 @@ namespace WaterUseServices.Controllers
             }
         }
         
-        [HttpPost][Authorize(Policy = "Restricted")]
+        [HttpPost][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Post([FromBody]TimeSeries entity)
         {
             try
@@ -68,7 +68,7 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPost("/Regions/{regionID}/[controller]/Batch")]
-        [Authorize(Policy = "Restricted")]
+        [Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Batch(int regionID, [FromBody]List<FCTimeSeries> entities)
         {
             Dictionary<int, Error> msgs = new Dictionary<int, Error>();
@@ -100,7 +100,7 @@ namespace WaterUseServices.Controllers
             }
         }
 
-        [HttpPut("{id}")][Authorize(Policy = "Restricted")]
+        [HttpPut("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Put(int id, [FromBody]TimeSeries entity)
         {
             try
@@ -115,7 +115,7 @@ namespace WaterUseServices.Controllers
            
         }
         
-        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
+        [HttpDelete("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Delete(int id)
         {
             try

@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v1.1",
-    "signature": "aaff6610ba38ccebf3ba31b375948ed1fe91a695"
+    "signature": "91162b5795c957f730853564e3b3771bbcb39965"
   },
   "compilationOptions": {
     "defines": [
@@ -35,7 +35,8 @@
           "WaterUseAgent": "1.0.0",
           "WaterUseDB": "1.0.0",
           "WiM.DBUtilities": "1.0.2",
-          "WiM.Security": "1.0.2"
+          "WiM.Security": "1.0.2",
+          "WiM.Services": "1.0.2"
         },
         "runtime": {
           "WaterUseServices.dll": {}
@@ -1713,11 +1714,28 @@
           "lib/netstandard1.4/WiM.Security.dll": {}
         }
       },
+      "wim.services/1.0.2": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Authentication": "1.1.2",
+          "Microsoft.AspNetCore.Http.Abstractions": "1.1.2",
+          "Microsoft.Extensions.Options": "1.1.2",
+          "NETStandard.Library": "1.6.1",
+          "WiM.Resources": "1.0.2",
+          "WiM.Security": "1.0.2"
+        },
+        "runtime": {
+          "lib/netstandard1.4/WiM.Services.dll": {}
+        },
+        "compile": {
+          "lib/netstandard1.4/WiM.Services.dll": {}
+        }
+      },
       "wateruseagent/1.0.0": {
         "dependencies": {
           "Microsoft.NETCore.App": "1.1.2",
           "Newtonsoft.Json": "10.0.3",
-          "WaterUseDB": "1.0.0"
+          "WaterUseDB": "1.0.0",
+          "WiM.Resources": "1.0.2"
         },
         "runtime": {
           "WaterUseAgent.dll": {}
@@ -4127,23 +4145,30 @@
     "wim.dbutilities/1.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZbVg+iNa/v50TulUWv4oWO2OcawkIFbJ3BbiMeGt8mT7mh9Ry/8nRcWdaXzRLZvhEQpxIlzM4680DBFiQCquvw==",
+      "sha512": "sha512-jgkcecQpVoAD6yMCZjwHvy0P8nGnlUxnxyhJ5G/tGQKB5qmjuXo1wmsbkSuSfC4i3jeGHUxX+lwSpQ6ZCSmrdQ==",
       "path": "wim.dbutilities/1.0.2",
       "hashPath": "wim.dbutilities.1.0.2.nupkg.sha512"
     },
     "wim.resources/1.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-KEPZbZjV7Dp267cLEXEeiol05uEydZjkctI97CvZbEhtY9nDatY7JnNO158BJE+L9ZHhlygnYxqGe0CxNCDnkg==",
+      "sha512": "sha512-F55Jwz8V2Phmv4rEDBpfcW5syerGOO4/aXwxQyMyaurSU8G4fTlCP/J2IyFQByk+wBiwcykxXPozEG5MUitYrQ==",
       "path": "wim.resources/1.0.2",
       "hashPath": "wim.resources.1.0.2.nupkg.sha512"
     },
     "wim.security/1.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-31Sc430NtzbF156jmDQDh9EHq9VWbvWG1B7sY2qqy5I20Q2aCfoXUvj2M/VH6SQ7bT+Jn7SlLnIbcdJBW5iQHQ==",
+      "sha512": "sha512-PnBa+sD0q7K3rzV0FGrcYNCX+H/LhgxkkbKAEqyBh548k/SYQDrua8SiQdCZZlN13D0OjYeZTHgbQ/fsMcjAbw==",
       "path": "wim.security/1.0.2",
       "hashPath": "wim.security.1.0.2.nupkg.sha512"
+    },
+    "wim.services/1.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lpNNBxmX4EslLJS4ooXokRGKTTJ3sTGJJxluga1pFin4a2A+9f0VhPVxegd6OQXP5jV1CRAHaUwZhLi4LlDrEA==",
+      "path": "wim.services/1.0.2",
+      "hashPath": "wim.services.1.0.2.nupkg.sha512"
     },
     "wateruseagent/1.0.0": {
       "type": "project",

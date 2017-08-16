@@ -29,6 +29,7 @@ using Microsoft.EntityFrameworkCore;
 using WaterUseAgent.Resources;
 using System.Globalization;
 using System.Threading.Tasks;
+using WiM.Security.Authentication.Basic;
 
 namespace WaterUseAgent
 {
@@ -44,14 +45,14 @@ namespace WaterUseAgent
         Task<T> Update<T>(Int32 pkId, T item) where T : class, new();
         Task Delete<T>(T item) where T : class, new();
         IQueryable<Role> GetRoles();
-        Manager GetManagerByUsername(string username);
+        IBasicUser GetUserByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
         Wateruse GetWateruse(object basin, Int32 startyear, Int32? endyear);
         Region GetRegionByIDOrShortName(string identifier);
         IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, Int32 startyear, Int32? endyear);
         IDictionary<string,Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear);
     }
-    public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent
+    public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent, IBasicUserAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
         private Domestic DomesticUse { get; set; }     
@@ -124,11 +125,13 @@ namespace WaterUseAgent
         }
         #endregion
         #region Manager
-        public Manager GetManagerByUsername(string username) {
+        public IBasicUser GetUserByUsername(string username) {
             try
             {
 
-                return this.Select<Manager>().Include(p=>p.Role).FirstOrDefault(u=>string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
+                return Select<Manager>().Include(p => p.Role).Where(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase))
+                    .Select(u => new User() { FirstName = u.FirstName, LastName = u.LastName,
+                     Email = u.Email, Role= u.Role.Name, RoleID = u.RoleID, ID= u.ID, Username = u.Username, Salt=u.Salt, password = u.Password} ).FirstOrDefault();
             }
             catch (Exception)
             {
@@ -138,7 +141,7 @@ namespace WaterUseAgent
 
         }
         #endregion
-        #region Manager
+        #region Region
         public Region GetRegionByIDOrShortName(string identifier)
         {
             try
@@ -281,15 +284,18 @@ namespace WaterUseAgent
                         sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
                         foreach (var item in sourceList)
                         {
-                            item.CatagoryTypeID = null;
-                            result.Add(item.FacilityCode, new Wateruse()
+                            //Bysources doesn't return by catagories
+                            //item.CatagoryTypeID = null;
+                            var wu = new Wateruse()
                             {
                                 ProcessDate = DateTime.Now,
                                 StartYear = startyear,
                                 EndYear = endyear,
                                 Return = getWaterUseReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear),
                                 Withdrawal = getWaterUseWithdrawals(sourceList.Where(s => s.Equals(item)).ToList(), startyear, endyear)
-                        });
+                            };
+                            if(wu.Return != null || wu.Withdrawal != null)
+                                result.Add(item.FacilityCode,wu);
 
                         }//next item
                         return result;
@@ -315,12 +321,12 @@ namespace WaterUseAgent
 
                 tslist = sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value).ToList();
                 if (this.IncludePermittedWithdrawals)
-                    pmtlist = sources.SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
+                    pmtlist = sources.Where(s=>s.Permits !=null).SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
                                                                                 p.StartDate.Value.Year <= endyear.Value).ToList();
                 if (this.DomesticUse != null)
                     tslist.AddRange(getDomesticTimeseries(startyear,endyear.Value));
-               
-                
+
+                if (tslist.Count < 1) return null;
 
                 return new WateruseSummary() {
                     Annual = tslist != null && tslist.Count > 0 ? tslist.GroupBy(ts => ts.Source.SourceType.Code)
@@ -341,7 +347,7 @@ namespace WaterUseAgent
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value / yrspan)
                         }),
-                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.GroupBy(cd => cd.Source.CatagoryType.Code)
+                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.Where(cd=>cd.Source.CatagoryTypeID.HasValue).GroupBy(cd => cd.Source.CatagoryType.Code)
                         .ToDictionary(ky => ky.Key, cval => new WateruseValue()
                         {
                             Name = cval.First().Source.CatagoryType.Name,
@@ -398,11 +404,11 @@ namespace WaterUseAgent
                          Source = ts.Source,
                          UnitTypeID = ts.UnitTypeID ,
                          UnitType = ts.UnitType,
-                         multiplier = ts.Value*catCoeff.FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CatagoryTypeID == ts.Source.CatagoryTypeID).Value,
+                         multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CatagoryCoefficient() { Value=0 }).FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CatagoryTypeID == ts.Source.CatagoryTypeID).Value,
                          Value =ts.Value
                     }).ToList():null;
 
-                if (tslist == null) return null;
+                if (tslist.Count < 1) return null;
 
                 if (this.DomesticUse != null && sources.All(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)))
                 {

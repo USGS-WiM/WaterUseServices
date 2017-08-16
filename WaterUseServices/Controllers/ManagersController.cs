@@ -127,7 +127,7 @@ namespace WaterUseServices.Controllers
             }
         }
 
-        [HttpPut("{id}")][Authorize(Policy = "Restricted")]
+        [HttpPut("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Put(int id, [FromBody]Manager entity)
         {
             Manager ObjectToBeUpdated = null;

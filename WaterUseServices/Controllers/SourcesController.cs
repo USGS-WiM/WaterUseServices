@@ -110,7 +110,7 @@ namespace WaterUseServices.Controllers
             }
         }       
 
-        [HttpPost][Authorize(Policy = "Restricted")]
+        [HttpPost][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Post([FromBody]Source entity)
         {
             try
@@ -133,7 +133,7 @@ namespace WaterUseServices.Controllers
 
         [HttpPost("/Regions/{region}/[controller]/Batch")]
         [HttpPost]
-        [Authorize(Policy = "Restricted")]
+        [Authorize(Policy = "CanModify")]
         [Route("Batch")]
         public async Task<IActionResult> Batch([FromBody]List<Source> entities, string region = "")
         {
@@ -202,7 +202,7 @@ namespace WaterUseServices.Controllers
             }
         }
         
-        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
+        [HttpDelete("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Delete(int id)
         {
             try
