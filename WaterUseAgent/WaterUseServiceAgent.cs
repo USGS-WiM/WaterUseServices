@@ -29,6 +29,7 @@ using Microsoft.EntityFrameworkCore;
 using WaterUseAgent.Resources;
 using System.Globalization;
 using System.Threading.Tasks;
+using WiM.Security.Authentication.Basic;
 
 namespace WaterUseAgent
 {
@@ -44,14 +45,14 @@ namespace WaterUseAgent
         Task<T> Update<T>(Int32 pkId, T item) where T : class, new();
         Task Delete<T>(T item) where T : class, new();
         IQueryable<Role> GetRoles();
-        Manager GetManagerByUsername(string username);
+        IBasicUser GetUserByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
         Wateruse GetWateruse(object basin, Int32 startyear, Int32? endyear);
         Region GetRegionByIDOrShortName(string identifier);
         IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, Int32 startyear, Int32? endyear);
         IDictionary<string,Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear);
     }
-    public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent
+    public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent, IBasicUserAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
         private Domestic DomesticUse { get; set; }     
@@ -124,11 +125,13 @@ namespace WaterUseAgent
         }
         #endregion
         #region Manager
-        public Manager GetManagerByUsername(string username) {
+        public IBasicUser GetUserByUsername(string username) {
             try
             {
 
-                return this.Select<Manager>().Include(p=>p.Role).FirstOrDefault(u=>string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
+                return Select<Manager>().Include(p => p.Role).Where(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase))
+                    .Select(u => new User() { FirstName = u.FirstName, LastName = u.LastName,
+                     Email = u.Email, Role= u.Role.Name, RoleID = u.RoleID, ID= u.ID, Username = u.Username, Salt=u.Salt, password = u.Password} ).FirstOrDefault();
             }
             catch (Exception)
             {
@@ -138,7 +141,7 @@ namespace WaterUseAgent
 
         }
         #endregion
-        #region Manager
+        #region Region
         public Region GetRegionByIDOrShortName(string identifier)
         {
             try

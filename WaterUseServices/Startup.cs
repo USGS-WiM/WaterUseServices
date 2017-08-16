@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using WaterUseDB;
 using WaterUseAgent;
-using WaterUseServices.Security.Authentication.Basic;
+using WiM.Security.Authentication.Basic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
@@ -47,6 +47,7 @@ namespace WaterUseServices
                                                             .EnableSensitiveDataLogging());
 
             services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();
+            services.AddScoped<IBasicUserAgent, WaterUseServiceAgent>();
             services.AddAuthorization(options => loadAutorizationPolicies(options));
             services.AddCors(options => {
                 options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()

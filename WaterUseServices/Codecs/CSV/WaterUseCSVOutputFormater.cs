@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using WiM.Codecs.CSV;
 using WaterUseAgent.Resources;
-using WaterUseAgent.Extensions;
 
 namespace WaterUseServices.Codecs.CSV
 {
