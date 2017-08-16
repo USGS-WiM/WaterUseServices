@@ -88,7 +88,7 @@ namespace WaterUseServices
                 policy => policy.RequireRole("Administrator", "Manager"));
             options.AddPolicy(
                 "Restricted",
-                policy => policy.RequireRole("Administrator", "Manager"));
+                policy => policy.RequireRole("Administrator", "Manager", "General"));
             options.AddPolicy(
                 "AdminOnly",
                 policy => policy.RequireRole("Administrator"));

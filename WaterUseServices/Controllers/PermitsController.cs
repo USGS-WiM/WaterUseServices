@@ -69,7 +69,7 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPost("/Sources/{sourceID}/[controller]")]
-        [Authorize(Policy = "Restricted")]
+        [Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Post(int sourceID, [FromBody]Permit entity)
         {
             try
@@ -117,7 +117,7 @@ namespace WaterUseServices.Controllers
             }
         }
        
-        [HttpDelete("{id}")][Authorize(Policy = "Restricted")]
+        [HttpDelete("{id}")][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Delete(int id)
         {
             try

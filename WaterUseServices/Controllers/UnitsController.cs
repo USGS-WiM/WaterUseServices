@@ -63,7 +63,7 @@ namespace WaterUseServices.Controllers
             }
         }
         
-        [HttpPost][Authorize(Policy = "Restricted")]
+        [HttpPost][Authorize(Policy = "CanModify")]
         public async Task<IActionResult> Post([FromBody]UnitType entity)
         {
             try

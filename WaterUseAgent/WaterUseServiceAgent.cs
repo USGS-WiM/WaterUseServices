@@ -281,7 +281,8 @@ namespace WaterUseAgent
                         sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).ToList();
                         foreach (var item in sourceList)
                         {
-                            item.CatagoryTypeID = null;
+                            //Bysources doesn't return by catagories
+                            //item.CatagoryTypeID = null;
                             var wu = new Wateruse()
                             {
                                 ProcessDate = DateTime.Now,
@@ -317,7 +318,7 @@ namespace WaterUseAgent
 
                 tslist = sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value).ToList();
                 if (this.IncludePermittedWithdrawals)
-                    pmtlist = sources.SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
+                    pmtlist = sources.Where(s=>s.Permits !=null).SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
                                                                                 p.StartDate.Value.Year <= endyear.Value).ToList();
                 if (this.DomesticUse != null)
                     tslist.AddRange(getDomesticTimeseries(startyear,endyear.Value));
@@ -400,11 +401,11 @@ namespace WaterUseAgent
                          Source = ts.Source,
                          UnitTypeID = ts.UnitTypeID ,
                          UnitType = ts.UnitType,
-                         multiplier = ts.Value*catCoeff.FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CatagoryTypeID == ts.Source.CatagoryTypeID).Value,
+                         multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CatagoryCoefficient() { Value=0 }).FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CatagoryTypeID == ts.Source.CatagoryTypeID).Value,
                          Value =ts.Value
                     }).ToList():null;
 
-                if (tslist == null) return null;
+                if (tslist.Count < 1) return null;
 
                 if (this.DomesticUse != null && sources.All(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)))
                 {
