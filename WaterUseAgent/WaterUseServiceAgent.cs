@@ -509,11 +509,12 @@ namespace WaterUseAgent
                     return @"select * from ""public"".""Sources""
                                 where ST_Within(
                                     ""Location"",
-                                    st_transform(
-                                        st_setsrid(
-                                            ST_GeomFromGeoJSON('{{{0}}}'),
-                                        {1}),
-                                    4269))";
+                                    st_makevalid(
+                                        st_transform(
+                                            st_setsrid(
+                                                ST_GeomFromGeoJSON('{{{0}}}'),
+                                            {1}),
+                                        4269)))";
                 case sqlTypes.e_source:
                     return @"SELECT * FROM ""public"".""Sources"" 
                                 WHERE ""ID"" IN ('{0}') OR 
