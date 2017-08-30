@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using WaterUseDB;
 using WaterUseAgent;
-using WiM.Security.Authentication.Basic1;
 using WiM.Security.Authentication.Basic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
