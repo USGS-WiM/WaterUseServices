@@ -48,6 +48,11 @@ namespace WaterUseServices
 
             services.AddScoped<IWaterUseAgent, WaterUseServiceAgent>();
             services.AddScoped<IBasicUserAgent, WaterUseServiceAgent>();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = BasicDefaults.AuthenticationScheme;
+            }).AddBasicAuthentication();
+
             services.AddAuthorization(options => loadAutorizationPolicies(options));
             services.AddCors(options => {
                 options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
@@ -64,8 +69,6 @@ namespace WaterUseServices
                     .AddXmlSerializerFormatters()
                     .AddXmlDataContractSeria‌​lizerFormatters()
                     .AddJsonOptions(options => loadJsonOptions(options));
-
-
         }
 
      
@@ -75,8 +78,8 @@ namespace WaterUseServices
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            app.UseBasicAuthentication(new BasicAuthenticationOptions());
             // global policy - assign here or on each controller
+            app.UseAuthentication();
             app.UseCors("CorsPolicy");
             app.UseMvc();
         }

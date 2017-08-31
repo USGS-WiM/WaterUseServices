@@ -23,8 +23,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 
 namespace WiM.Utilities.ServiceAgent
 {
@@ -70,12 +69,12 @@ namespace WiM.Utilities.ServiceAgent
                 }//end switch
 
                 if (response == null) throw new Exception("http request invalid");
-
+                //throws an exception if not 200
                 response.EnsureSuccessStatusCode();
-                var stringResult = await response.Content.ReadAsStringAsync();
 
-                if (!string.IsNullOrEmpty(stringResult))
-                    result = JsonConvert.DeserializeObject<T>(stringResult);
+                var stream = await response.Content.ReadAsStreamAsync();
+                if (stream != null)
+                    result = DeserializeStream<T>(stream);
 
                 return result;
             }
@@ -86,6 +85,29 @@ namespace WiM.Utilities.ServiceAgent
 
         }//end ExecuteAsync<T>
 
+        #endregion
+        #region Helper Methods
+        private T DeserializeStream<T>(Stream stream)
+        {
+            using (var sr = new StreamReader(stream))
+            {
+                using (var jsonTextReader = new JsonTextReader(sr))
+                {
+                    var serializer = new JsonSerializer();
+                    return serializer.Deserialize<T>(jsonTextReader);
+                }//end using
+            }//end using
+        }
+        private static void Serialize<T>(T value, Stream s)
+        {
+            using (StreamWriter writer = new StreamWriter(s))
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
+            {
+                JsonSerializer ser = new JsonSerializer();
+                ser.Serialize(jsonWriter, value);
+                jsonWriter.Flush();
+            }
+        }
         #endregion
 
     }//end class ServiceAgentBase
