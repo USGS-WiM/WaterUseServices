@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using WaterUseServices.Codecs.CSV;
+using WiM.Services.Analytics;
+using WiM.Utilities.ServiceAgent;
+using WiM.Services.Middleware;
 
 namespace WaterUseServices
 {
@@ -38,6 +41,7 @@ namespace WaterUseServices
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IAnalyticsAgent, GoogleAnalyticsAgent>((gaa) => new GoogleAnalyticsAgent(Configuration["AnalyticsKey"]));
             // Add framework services.
             services.AddDbContext<WaterUseDBContext>(options =>
                                                         options.UseNpgsql(String.Format(Configuration
@@ -81,6 +85,7 @@ namespace WaterUseServices
             // global policy - assign here or on each controller
             app.UseAuthentication();
             app.UseCors("CorsPolicy");
+            app.Use_Analytics();
             app.UseMvc();
         }
 

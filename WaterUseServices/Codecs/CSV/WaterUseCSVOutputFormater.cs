@@ -44,7 +44,6 @@ namespace WaterUseServices.Codecs.CSV
         }
 
         private StringWriter getSourceWateruseCSV(IDictionary<string, Wateruse> value) {
-            Int16 stachObj =0;
             try
             {
                 //Type itemType = type.GetGenericArguments()[0];
@@ -59,61 +58,22 @@ namespace WaterUseServices.Codecs.CSV
                 stringWriter.WriteLine();//blank line
 
                 //headers
-                var hr= value.Where(w =>
-                          w.Value.Return != null).SelectMany(wu =>
-                         wu.Value.Return.Annual.Select(Ann => "ANN_Ret_" + Ann.Key)).Distinct().Concat(
-
-                value.Where(w =>
+                var headers = new List<string>() { "FacilityCode", "Facility_Type", "Use_Type", "ANN_Total" }.Concat( value.Where(w =>
                              w.Value.Return != null).SelectMany(wu => wu.Value.Return.Monthly.SelectMany(mon =>
-                             mon.Value.Month.Select(v => mon.Key.ToString("00") + "_Ret_" + v.Key))).Distinct().OrderBy(s => s));
-
-
-                var hw = value.Where(w =>
-                             w.Value.Withdrawal != null).SelectMany(wu =>
-                            wu.Value.Withdrawal.Annual.Select(Ann => "ANN_With_" + Ann.Key)).Distinct().Concat(
-
-                value.Where(w =>
-                             w.Value.Withdrawal != null).SelectMany(wu => wu.Value.Withdrawal.Monthly.SelectMany(mon =>
-                             mon.Value.Month.Select(v => mon.Key.ToString("00") + "_With_" + v.Key))).Distinct().OrderBy(s => s));
-                //catagories should not be output.--> This is not quite right
-                //value.Where(w =>
-                //             w.Value.Withdrawal != null).Where(wu=>wu.Value.Withdrawal.Monthly.Any(m=>m.Value.Code != null)).SelectMany(wu => 
-                //                wu.Value.Withdrawal.Monthly.SelectMany(mon =>mon.Value.Code)).Select(cd=>cd.Key).Distinct());
-
-                var headers = hr.Concat(hw).ToList();
-               
-                headers.Insert(0, "FacilityCode");
+                             mon.Value.Month.Select(v => mon.Key.ToString("00")))).Concat(
+                        value.Where(w =>
+                             w.Value.Withdrawal != null).SelectMany(wwu => wwu.Value.Withdrawal.Monthly.SelectMany(mon =>
+                             mon.Value.Month.Select(v => mon.Key.ToString("00"))))).Distinct().OrderBy(s => s)).ToList();               
+                        
                 stringWriter.WriteLine(String.Join(",", headers));
-
-                //stringWriter.WriteLine(string.Join<string>(",", itemType.GetProperties().Select(x => x.Name)));
 
                 foreach (var obj in (IDictionary<string, WaterUseAgent.Resources.Wateruse>)value)
                 {
-                    string[] line = new string[headers.Count];
-                    line[0]=(obj.Key);
+                    if (obj.Value.Return != null)
+                        stringWriter.WriteLine(string.Join(",", getStringLine(headers, obj.Value.Return, obj.Key, "Return")));
 
-                    if (obj.Value.Return != null) {
-                        obj.Value.Return.Annual.ToList().ForEach(ann=> line[headers.IndexOf("ANN_Ret_"+ann.Key)]= ann.Value.Value.ToString("N4"));
-
-                        obj.Value.Return.Monthly.Where(c => c.Value.Month != null).SelectMany(m => m.Value.Month.Select(wu => 
-                            new { key = m.Key.ToString("00") + "_Ret_" + wu.Key, value = wu.Value.Value }))
-                            .ToList().ForEach(item => line[headers.IndexOf(item.key)] = item.value.ToString("N4"));
-                    }
                     if (obj.Value.Withdrawal != null)
-                    {
-                        obj.Value.Withdrawal.Annual.ToList().ForEach(ann => line[headers.IndexOf("ANN_With_" + ann.Key)] = ann.Value.Value.ToString("N4"));
-
-                        obj.Value.Withdrawal.Monthly.Where(c => c.Value.Month != null).SelectMany(m => m.Value.Month.Select(wu => new { key = m.Key.ToString("00") + "_With_" + wu.Key, value = wu.Value.Value }))
-                            .ToList().ForEach(item => line[headers.IndexOf(item.key)] = item.value.ToString("N4"));
-
-                        //catagories should not be output --> this is not quite right
-                        //obj.Value.Withdrawal.Monthly.Where(c=>c.Value.Code != null).SelectMany(m => m.Value.Code.Select(wu => new { key = m.Key.ToString("00") + "_With_" + wu.Key, value = wu.Value.Value }))
-                        //    .ToList().ForEach(item => line[headers.IndexOf(item.key)] = item.value.ToString("N4"));
-                    }
-
-                    stringWriter.WriteLine(string.Join(",",line));
-                    stachObj++;
-
+                        stringWriter.WriteLine(string.Join(",", getStringLine(headers, obj.Value.Withdrawal, obj.Key, "Withdrawal")));
                 }//next obj
 
                 return stringWriter;
@@ -123,8 +83,32 @@ namespace WaterUseServices.Codecs.CSV
                 throw;
             }
         }
-        
 
+        private string[] getStringLine(List<string> headers, WateruseSummary summary, string name, string type) {
+            string[] line = new string[headers.Count];
+            try
+            {
+                if (summary == null || headers.Count < 1 )return line;
+
+                line = new string[headers.Count];
+                line[0] = name;
+                line[1] = summary.Annual.First().Key;
+                line[2] = type;
+                summary.Annual.ToList().ForEach(ann => line[headers.IndexOf("ANN_Total")] = ann.Value.Value.ToString("N6"));
+
+                summary.Monthly.Where(c => c.Value.Month != null).SelectMany(m => m.Value.Month.Select(wu =>
+                    new { key = m.Key.ToString("00"), value = wu.Value.Value }))
+                    .ToList().ForEach(item => line[headers.IndexOf(item.key)] = item.value.ToString("N6"));
+                return line;
+            }
+            catch (Exception ex)
+            {
+
+                return line;
+            }
+
+
+        }
         private string join(string str, string _val) {
             if (!string.IsNullOrEmpty(_val))
             {

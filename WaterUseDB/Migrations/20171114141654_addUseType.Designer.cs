@@ -12,9 +12,10 @@ using WaterUseDB;
 namespace WaterUseDB.Migrations
 {
     [DbContext(typeof(WaterUseDBContext))]
-    partial class WaterUseDBContextModelSnapshot : ModelSnapshot
+    [Migration("20171114141654_addUseType")]
+    partial class addUseType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,8 +59,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                    b.HasIndex("Code");
 
                     b.ToTable("CatagoryTypes");
                 });
@@ -99,8 +99,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.HasIndex("Username")
-                        .IsUnique();
+                    b.HasIndex("Username");
 
                     b.ToTable("Managers");
                 });
@@ -145,10 +144,6 @@ namespace WaterUseDB.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("FIPSCode")
-                        .IsRequired()
-                        .HasMaxLength(2);
-
                     b.Property<string>("Name")
                         .IsRequired();
 
@@ -157,8 +152,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ShortName")
-                        .IsUnique();
+                    b.HasIndex("ShortName");
 
                     b.ToTable("Regions");
                 });
@@ -189,8 +183,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("Roles");
                 });
@@ -219,14 +212,13 @@ namespace WaterUseDB.Migrations
 
                     b.Property<string>("StationID");
 
-                    b.Property<int>("UseTypeID");
+                    b.Property<int>("UseTypeID")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.HasKey("ID");
 
                     b.HasIndex("CatagoryTypeID");
-
-                    b.HasIndex("FacilityCode")
-                        .IsUnique();
 
                     b.HasIndex("RegionID");
 
@@ -252,8 +244,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                    b.HasIndex("Code");
 
                     b.ToTable("SourceTypes");
                 });
@@ -273,8 +264,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                    b.HasIndex("Code");
 
                     b.ToTable("StatusTypes");
                 });
@@ -314,8 +304,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Abbreviation")
-                        .IsUnique();
+                    b.HasIndex("Abbreviation");
 
                     b.ToTable("UnitTypes");
                 });
@@ -335,8 +324,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                    b.HasIndex("Code");
 
                     b.ToTable("UseTypes");
                 });

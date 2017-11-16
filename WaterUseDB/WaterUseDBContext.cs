@@ -39,6 +39,7 @@ namespace WaterUseDB
         public DbSet<SourceType> SourceTypes { get; set; }
         public DbSet<StatusType> StatusTypes { get; set; }
         public DbSet<TimeSeries> TimeSeries { get; set; }
+        public DbSet<UseType> UseTypes { get; set; }
         public DbSet<UnitType> UnitTypes { get; set; }
         public WaterUseDBContext() : base()
         {
@@ -54,13 +55,15 @@ namespace WaterUseDB
             //Specify other unique constraints
             //EF Core currently does not support changing the value of alternate keys. We do have #4073 tracking removing this restriction though.
             //BTW it only needs to be an alternate key if you want it to be used as the target key of a relationship.If you just want a unique index, then use the HasIndex() method, rather than AlternateKey().Unique index values can be changed.
-            modelBuilder.Entity<SourceType>().HasIndex(k => k.Code);
-            modelBuilder.Entity<Role>().HasIndex(k => k.Name);
-            modelBuilder.Entity<Manager>().HasIndex(k => k.Username);
-            modelBuilder.Entity<Region>().HasIndex(k => k.ShortName);
-            modelBuilder.Entity<CatagoryType>().HasIndex(k => k.Code);
-            modelBuilder.Entity<UnitType>().HasIndex(k => k.Abbreviation);
-            modelBuilder.Entity<StatusType>().HasIndex(k => k.Code);
+            modelBuilder.Entity<SourceType>().HasIndex(k => k.Code).IsUnique();
+            modelBuilder.Entity<UseType>().HasIndex(k => k.Code).IsUnique();
+            modelBuilder.Entity<Role>().HasIndex(k => k.Name).IsUnique();
+            modelBuilder.Entity<Manager>().HasIndex(k => k.Username).IsUnique();
+            modelBuilder.Entity<Region>().HasIndex(k => k.ShortName).IsUnique();
+            modelBuilder.Entity<CatagoryType>().HasIndex(k => k.Code).IsUnique();
+            modelBuilder.Entity<UnitType>().HasIndex(k => k.Abbreviation).IsUnique();
+            modelBuilder.Entity<StatusType>().HasIndex(k => k.Code).IsUnique();
+            modelBuilder.Entity<Source>().HasIndex(k => k.FacilityCode).IsUnique();
 
             //add shadowstate for when models change
             foreach (var entitytype in modelBuilder.Model.GetEntityTypes())
@@ -94,6 +97,10 @@ namespace WaterUseDB
                         .WithMany()
                         .HasForeignKey("SourceTypeID")
                         .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("WaterUseDB.Resources.UseType", "UseType")
+                        .WithMany()
+                        .HasForeignKey("UseTypeID")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
             modelBuilder.Entity("WaterUseDB.Resources.TimeSeries", b =>
             {
@@ -108,7 +115,7 @@ namespace WaterUseDB
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #warning Add connectionstring for migrations
-            var connectionstring = "";
+            var connectionstring = "User ID=;Password=;Host=;Port=5432;Database=wateruse;Pooling=true;";
             //optionsBuilder.UseNpgsql(connectionstring);
         }
     }

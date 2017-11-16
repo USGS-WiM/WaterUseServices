@@ -266,4 +266,24 @@ namespace WaterUseDB.Resources
             return (this.Name + this.Abbreviation).GetHashCode();
         }
     }//end 
+
+    public partial class UseType : IEquatable<UseType>
+    {
+        public bool Equals(UseType other)
+        {
+            return String.Equals(this.Name.ToLower(), other.Name.ToLower()) &&
+                   String.Equals(this.Code.ToLower(), other.Code.ToLower());
+        }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals(obj as UseType);
+        }
+        public override int GetHashCode()
+        {
+            return (this.Name + this.Code).GetHashCode();
+        }
+    }//end 
 }

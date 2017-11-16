@@ -18,41 +18,21 @@
 //
 //   
 
-using NpgsqlTypes;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public partial class Source
+    public partial class UseType
     {
         [Required]
         public int ID { get; set; }
-
+        [Required]
         public string Name { get; set; }
         [Required]
-        public string FacilityName { get; set; }
-        [Required]
-        public string FacilityCode{ get; set; }
+        public string Code { get; set; }
+        public string Description { get; set; }
 
-        public string StationID { get; set; }
-
-        public int? CatagoryTypeID { get; set; }
-        [Required]
-        public int SourceTypeID { get; set; }
-        [Required]
-        public int UseTypeID { get; set; }
-        [Required]
-        public int RegionID { get; set; }
-        [Required]
-        public PostgisPoint Location { get; set; }
-
-
-        public Region Region { get; set; }
-        public CatagoryType CatagoryType { get; set; }
-        public SourceType SourceType { get; set; }
-        public UseType UseType { get; set; }
-        public List<Permit> Permits { get; set; }
-        public List<TimeSeries> TimeSeries { get; set; }
+        List<Source> Sources { get; set; }
     }
 }

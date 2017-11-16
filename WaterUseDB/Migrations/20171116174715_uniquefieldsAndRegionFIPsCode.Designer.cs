@@ -12,9 +12,10 @@ using WaterUseDB;
 namespace WaterUseDB.Migrations
 {
     [DbContext(typeof(WaterUseDBContext))]
-    partial class WaterUseDBContextModelSnapshot : ModelSnapshot
+    [Migration("20171116174715_uniquefieldsAndRegionFIPsCode")]
+    partial class uniquefieldsAndRegionFIPsCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
