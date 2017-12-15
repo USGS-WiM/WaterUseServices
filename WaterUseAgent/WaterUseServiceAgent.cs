@@ -315,7 +315,7 @@ namespace WaterUseAgent
             List<TimeSeries> tslist = null;
             
             List<Permit> pmtlist = null;
-            Int32 yrspan = 1;
+            //Int32 yrspan = 1;
             try
             {
                 if (sources.Count() < 1) return null;
@@ -330,13 +330,13 @@ namespace WaterUseAgent
                     tslist.AddRange(getDomesticTimeseries(startyear,endyear.Value));
 
                 if (tslist.Count < 1) return null;
-                yrspan = tslist.Select(x => x.Date.Year).Distinct().Count();
+                //yrspan = tslist.Select(x => x.Date.Year).Distinct().Count();
                 return new WateruseSummary() {
                     Annual = tslist != null && tslist.Count > 0 ? tslist.GroupBy(ts => ts.Source.SourceType.Code)
                     .ToDictionary(ky => ky.Key, mval => new WateruseValue() {
                         Name = mval.First().Source.SourceType.Name,
                         Description = "Daily Annual Average " + mval.First().Source.SourceType.Description,
-                        Value = mval.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))/yrspan,
+                        Value = mval.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))/mval.Select(x=>x.Date.Year).Distinct().Count(),
                         Unit = mval.First().UnitType
                     }):null,
 
@@ -348,7 +348,7 @@ namespace WaterUseAgent
                             Name = cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) +" "+ cval.First().Source.SourceType.Name,
                             Description = cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " daily monthly average",
                             Unit = cval.First().UnitType,
-                            Value = cval.Sum(ts => ts.Value/yrspan)
+                            Value = cval.Sum(ts => ts.Value/ mval.Select(x => x.Date.Year).Distinct().Count())
                         }),
                         Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.Where(cd=>cd.Source.CatagoryTypeID.HasValue).GroupBy(cd => cd.Source.CatagoryType.Code)
                         .ToDictionary(ky => ky.Key, cval => new WateruseValue()
@@ -356,7 +356,7 @@ namespace WaterUseAgent
                             Name = cval.First().Source.CatagoryType.Name,
                             Description = "Daily " + cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " average " + cval.First().Source.CatagoryType.Name,
                             Unit = cval.First().UnitType,
-                            Value = cval.Sum(ts => ts.Value/yrspan)
+                            Value = cval.Sum(ts => ts.Value/ mval.Select(x => x.Date.Year).Distinct().Count())
                         }) : null
                     }):null,
 

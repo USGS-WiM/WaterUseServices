@@ -23,27 +23,14 @@ namespace WaterUseServices.XUnitTest
 {
     public class PermitTest
     {
-        public PermitController controller { get; private set; }
+        public PermitsController controller { get; private set; }
         public PermitTest() {
             //Arrange
-            controller = new PermitController(new InMemoryPermitAgent());
+            controller = new PermitsController(new InMemoryPermitAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
         }
-        [Fact]
-        public async Task GetAll()
-        {           
-
-            //Act
-            var response = await controller.Get();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<EnumerableQuery<Permit>>(okResult.Value);
-
-            Assert.Equal(2, result.Count());
-            Assert.Equal("MockTestRole2", result.LastOrDefault().PermitNO);
-        }
+        
 
         [Fact]
         public async Task Get()
@@ -52,7 +39,7 @@ namespace WaterUseServices.XUnitTest
             var id = 1;
 
             //Act
-            var response = await controller.Get(id);
+            var response = await controller.GetSourcePermit(id);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);

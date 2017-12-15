@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading;
 using WaterUseAgent.Resources;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using WiM.Security.Authentication.Basic;
 
 namespace WaterUseServices.XUnitTest
 {
@@ -127,6 +128,7 @@ namespace WaterUseServices.XUnitTest
     public class InMemoryCatagoriesAgent : IWaterUseAgent
     {
         private List<CatagoryType> Catagories { get; set; }
+        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
 
         public InMemoryCatagoriesAgent() {
            this.Catagories = new List<CatagoryType>()
@@ -221,5 +223,24 @@ namespace WaterUseServices.XUnitTest
             throw new NotImplementedException();
         }
 
+        public void ComputeDomesticWateruse()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Configuration RegionConfigureationAsync(int regionID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBasicUser GetUserByUsername(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Region GetRegionByIDOrShortName(string identifier)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -16,6 +16,7 @@ using WaterUseServices.Codecs.CSV;
 using WiM.Services.Analytics;
 using WiM.Utilities.ServiceAgent;
 using WiM.Services.Middleware;
+using WiM.Services.Resources;
 
 namespace WaterUseServices
 {
@@ -42,6 +43,8 @@ namespace WaterUseServices
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IAnalyticsAgent, GoogleAnalyticsAgent>((gaa) => new GoogleAnalyticsAgent(Configuration["AnalyticsKey"]));
+            services.Configure<APIConfigSettings>(Configuration.GetSection("APIConfigSettings"));
+
             // Add framework services.
             services.AddDbContext<WaterUseDBContext>(options =>
                                                         options.UseNpgsql(String.Format(Configuration
@@ -74,8 +77,6 @@ namespace WaterUseServices
                     .AddXmlDataContractSeria‌​lizerFormatters()
                     .AddJsonOptions(options => loadJsonOptions(options));
         }
-
-     
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
