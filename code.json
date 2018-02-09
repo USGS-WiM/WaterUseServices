@@ -19,7 +19,7 @@
 
     "homepageURL": "https://wim.usgs.gov",
     "downloadURL": "https://github.com/USGS-WiM/WaerUseServices/archive/master.zip",
-    "disclaimerURL": "https://github.com/USGS-WiM/WaerUseServices/blob/master/LICENSE.md",
+    "disclaimerURL": "https://github.com/USGS-WiM/WaerUseServices/blob/master/DISCLAIMER.md",
     "repositoryUrl": "https://github.com/USGS-WiM/WaerUseServices",
     "vcs": "git",
 
