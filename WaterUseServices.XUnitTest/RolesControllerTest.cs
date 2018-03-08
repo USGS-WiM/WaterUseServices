@@ -26,7 +26,7 @@ namespace WaterUseServices.XUnitTest
         public RolesController controller { get; private set; }
         public RolesTest() {
             //Arrange
-            controller = new RolesController(new InMemoryRolesAgent());
+            controller = new RolesController(new InMemoryAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
 
@@ -122,112 +122,6 @@ namespace WaterUseServices.XUnitTest
             Assert.Equal("MockTestRole2", result.LastOrDefault().Name);
             Assert.Equal("test mock role 2", result.LastOrDefault().Description);
         }
-    }
+    }   
 
-    public class InMemoryRolesAgent : IWaterUseAgent
-    {
-        private List<Role> Roles { get; set; }
-        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
-
-        public InMemoryRolesAgent() {
-           this.Roles = new List<Role>()
-            { new Role() { ID=1,Name= "MockTestRole1", Description="test mock role 1" },
-                new Role() { ID=2,Name= "MockTestRole2", Description="test mock role 2" }};
-        
-    }
-
-        public Task<T> Add<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                Roles.Add(item as Role);
-            }
-            return Task.Run(()=> { return item; });
-        }
-
-        public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                Roles.AddRange(items.Cast<Role>());
-            }
-            return Task.Run(() => { return Roles.Cast<T>(); });
-        }
-
-        public Task Delete<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {                
-                return Task.Run(()=> { this.Roles.Remove(item as Role); });
-            }
-
-            else
-                throw new Exception("not of correct type");
-        }
-
-        public Task<T> Find<T>(int pk) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-                return Task.Run(()=> { return Roles.Find(i => i.ID == pk) as T; });
-
-            throw new Exception("not of correct type");
-        }
-
-        public Manager GetManagerByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<Role> GetRoles()
-        {
-            return this.Roles.AsQueryable();
-        }
-
-        public IQueryable<T> Select<T>() where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-                return this.Roles.AsQueryable() as IQueryable<T>;
-
-            throw new Exception("not of correct type");
-        }
-
-        public Task<T> Update<T>(int pkId, T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                var index = this.Roles.FindIndex(x=>x.ID == pkId);
-                (item as Role).ID = pkId; 
-                this.Roles[index] = item as Role;
-            }
-            throw new Exception("not of correct type");
-        }
-
-        public Wateruse GetWateruse(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Wateruse GetWateruse(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-    }
-    public class InMemoryModelValidator : IObjectModelValidator
-    {
-        public void Validate(ActionContext actionContext, ValidationStateDictionary validationState, string prefix, object model)
-        {
-            //assume all is valid
-            return;
-        }        
-    }
 }

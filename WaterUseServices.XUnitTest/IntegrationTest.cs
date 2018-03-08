@@ -21,7 +21,7 @@ namespace WaterUseServices.XUnitTest
             _client.BaseAddress = new Uri("http://localhost");
         }
 
-        //[Fact]
+        [Fact]
         public async Task Roles()
         {
             //Act

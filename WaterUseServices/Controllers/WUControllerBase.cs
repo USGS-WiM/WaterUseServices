@@ -87,7 +87,6 @@ namespace WaterUseServices.Controllers
                     return StatusCode(500, new Error(errorEnum.e_internalError, "A managed database error occured."));
                 }
             }
-
             else
             {
                 return StatusCode(500, new Error(errorEnum.e_internalError, "An error occured while processing your request."));
