@@ -1,6 +1,6 @@
 ![WiM](wimlogo.png)
 
-# Navigation Services
+# Wateruse Services
 
 StreamStats supporting wateruse REST web services.
 
@@ -18,7 +18,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 https://help.github.com/articles/cloning-a-repository/
 
-Open the solution file (.sln) using perfered IDE.
+Open the solution file (.sln) using preferred IDE.
 
 ## Building and testing
 

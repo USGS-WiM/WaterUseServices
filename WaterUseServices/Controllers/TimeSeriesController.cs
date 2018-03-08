@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using WaterUseServices.Resources;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using WaterUseAgent.Extensions;
 
 namespace WaterUseServices.Controllers
 {
@@ -74,7 +75,8 @@ namespace WaterUseServices.Controllers
             Dictionary<int, Error> msgs = new Dictionary<int, Error>();
             try
             {
-                var entityFClist = entities.Select(e => e.FacilityCode).ToList();
+                
+                var entityFClist = entities.AddFCFIPCode(agent.GetRegionByIDOrShortName(regionID.ToString()).FIPSCode).Select(e => e.FacilityCode).ToList();
                 var regionSources = agent.Select<Source>().Where(s => s.RegionID == regionID && entityFClist.Contains(s.FacilityCode))
                                         .Include("Region.RegionManagers").ToList();
 

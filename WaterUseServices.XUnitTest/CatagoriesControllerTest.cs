@@ -27,7 +27,7 @@ namespace WaterUseServices.XUnitTest
         public CategoriesController controller { get; private set; }
         public CatagoriesTest() {
             //Arrange
-            controller = new CategoriesController(new InMemoryCatagoriesAgent());
+            controller = new CategoriesController(new InMemoryAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
 
@@ -124,123 +124,5 @@ namespace WaterUseServices.XUnitTest
             Assert.Equal("test mock catagory 2", result.LastOrDefault().Description);
         }
     }
-
-    public class InMemoryCatagoriesAgent : IWaterUseAgent
-    {
-        private List<CatagoryType> Catagories { get; set; }
-        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
-
-        public InMemoryCatagoriesAgent() {
-           this.Catagories = new List<CatagoryType>()
-            { new CatagoryType() { ID=1,Name= "MockTestCatagory1", Description="test mock catagory 1" },
-                new CatagoryType() { ID=2,Name= "MockTestCatagory2", Description="test mock catagory 2" }};
-        
-    }
-
-        public Task<T> Add<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-            {
-                Catagories.Add(item as CatagoryType);
-            }
-            return Task.Run(()=> { return item; });
-        }
-
-        public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-            {
-                Catagories.AddRange(items.Cast<CatagoryType>());
-            }
-            return Task.Run(() => { return Catagories.Cast<T>(); });
-        }
-
-        public Task Delete<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-            {                
-                return Task.Run(()=> { this.Catagories.Remove(item as CatagoryType); });
-            }
-
-            else
-                throw new Exception("not of correct type");
-        }
-
-        public Task<T> Find<T>(int pk) where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-                return Task.Run(()=> { return Catagories.Find(i => i.ID == pk) as T; });
-
-            throw new Exception("not of correct type");
-        }
-
-        public Manager GetManagerByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<Role> GetRoles()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<T> Select<T>() where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-                return this.Catagories.AsQueryable() as IQueryable<T>;
-
-            throw new Exception("not of correct type");
-        }
-
-        public Task<T> Update<T>(int pkId, T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(CatagoryType))
-            {
-                var index = this.Catagories.FindIndex(x=>x.ID == pkId);
-                (item as CatagoryType).ID = pkId; 
-                this.Catagories[index] = item as CatagoryType;
-            }
-            throw new Exception("not of correct type");
-        }
-
-        public Wateruse GetWateruse(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Wateruse GetWateruse(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ComputeDomesticWateruse()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Configuration RegionConfigureationAsync(int regionID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IBasicUser GetUserByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Region GetRegionByIDOrShortName(string identifier)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    
 }

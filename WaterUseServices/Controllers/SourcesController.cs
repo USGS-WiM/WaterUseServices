@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using WaterUseAgent.Extensions;
 
 namespace WaterUseServices.Controllers
 {
@@ -39,34 +40,28 @@ namespace WaterUseServices.Controllers
         [Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get([FromQuery] int? RegionID = null)
         {
-            IQueryable<Source> query = null;
+            IQueryable<Region> regionquery = null;
             try
-            {
-                query = agent.Select<Source>();               
-
+            {                
                 if (!User.IsInRole("Administrator"))
                 {
                     //only return sources user has access to.
                     Int32 ID = LoggedInUser().ID;
                     if(ID < 1) return new UnauthorizedResult();
-                    query = query.Include(s => s.Region).ThenInclude(s=>s.RegionManagers).Where(s=>s.Region.RegionManagers.Any(rm=>rm.ManagerID == ID));
+                    regionquery = agent.GetManagedRegion(ID);
                 }//end if
+                else
+                {
+                    regionquery = agent.GetRegions();
+                }
 
                 if (RegionID.HasValue)
-                    query = query.Where(s => s.RegionID == RegionID);
+                {
+                    regionquery = regionquery.Where(s => s.ID == RegionID);
+                    if (regionquery.Count() < 1) return new BadRequestObjectResult(new Error(errorEnum.e_unauthorize, "User unauthorized, or invalid region requested"));
+                }
 
-                return Ok(query.Select(s => new Source()
-                                                {
-                                                    ID = s.ID,
-                                                    CatagoryTypeID = s.CatagoryTypeID,
-                                                    FacilityCode = s.FacilityCode,
-                                                    FacilityName = s.FacilityName,
-                                                    Name = s.Name,
-                                                    RegionID = s.RegionID,
-                                                    SourceTypeID = s.SourceTypeID,
-                                                    StationID = s.StationID,
-                                                    Location = s.Location
-                                                }));
+                return Ok(agent.GetSources(regionquery));
             }
             catch (Exception ex)
             {
@@ -78,31 +73,28 @@ namespace WaterUseServices.Controllers
         [Authorize(Policy = "Restricted")]
         public async Task<IActionResult> Get(int id)
         {
+            IQueryable<Region> regionquery = null;
             try
             {
                 if (id < 0) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
-               
 
-                var ObjectRequested = agent.Select<Source>().Include(s => s.Region)
-                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
+                if (!User.IsInRole("Administrator"))
+                {
+                    //only return sources user has access to.
+                    Int32 ID = LoggedInUser().ID;
+                    if (ID < 1) return new UnauthorizedResult();
+                    regionquery = agent.GetManagedRegion(ID);
+                }//end if
+                else
+                {
+                    regionquery = agent.GetRegions();
+                }
+                
+                var ObjectRequested = agent.GetSources(regionquery).FirstOrDefault(i=>i.ID == id);
 
                 if(ObjectRequested == null) return new BadRequestObjectResult(new Error(errorEnum.e_notFound)); // This returns HTTP 400 
 
-                if (ObjectRequested.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
-                    return new UnauthorizedResult();
-
-                return Ok(new Source()
-                {
-                    ID = ObjectRequested.ID,
-                    CatagoryTypeID = ObjectRequested.CatagoryTypeID,
-                    FacilityCode = ObjectRequested.FacilityCode,
-                    FacilityName = ObjectRequested.FacilityName,
-                    Name = ObjectRequested.Name,
-                    RegionID = ObjectRequested.RegionID,
-                    SourceTypeID = ObjectRequested.SourceTypeID,
-                    StationID = ObjectRequested.StationID,
-                    Location = ObjectRequested.Location
-                });
+                return Ok(ObjectRequested);
             }
             catch (Exception ex)
             {
@@ -116,14 +108,12 @@ namespace WaterUseServices.Controllers
             try
             {
                 //verify user can submit to region
-                if (!User.IsInRole("Administrator") && !agent.Select<Manager>().Include(m=>m.RegionManagers)
-                                                            .Where(m => m.ID == LoggedInUser().ID)
-                                                            .Any(m => m.RegionManagers.Select(rm=>rm.RegionID).Contains(entity.RegionID)))
-                    return new UnauthorizedResult();
+                if (!User.IsInRole("Administrator") && !agent.GetManagedRegion(LoggedInUser().ID).Any(r=>r.ID==entity.RegionID))
+                return new UnauthorizedResult();
 
-
-                if (!isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
-                return Ok(await agent.Add<Source>(entity));
+                if (!isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "One or more of the properties are invalid.")); // This returns HTTP 400
+               
+                return Ok(await agent.Add(entity));
             }
             catch (Exception ex)
             {
@@ -150,15 +140,16 @@ namespace WaterUseServices.Controllers
                 }//end if
 
                 //verify user can submit to region
-                if (!User.IsInRole("Administrator") && !entities.Select(x => x.RegionID).All(rid =>
-                                        agent.Select<Manager>().Include(m => m.RegionManagers).Where(rm => rm.ID == LoggedInUser().ID)
-                                                            .SelectMany(i => i.RegionManagers.Select(rm => rm.RegionID)).Contains(rid)))
+                if (!User.IsInRole("Administrator") && !entities.All(entity=> agent.GetManagedRegion(LoggedInUser().ID).Any(r => r.ID == entity.RegionID)))
                     return new UnauthorizedResult();
                 bool isOK = true;
+
+                var fcipcode = agent.GetRegions().ToDictionary(k => k.ID, k => k.FIPSCode);
 
                 for (int i = 0; i < entities.Count; i++)
                 {
                     var s = entities[i];
+                    entities[i].AddFCFIPCode(fcipcode[s.RegionID]);
                     if (!isValid(s))
                     {
                         msgs.Add(i, new Error(errorEnum.e_badRequest));
@@ -183,18 +174,22 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                var ObjectToBeUpdated = agent.Select<Source>().Include(s => s.Region)
-                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
 
-                if (ObjectToBeUpdated.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                if (!User.IsInRole("Administrator") && !agent.GetManagedRegion(LoggedInUser().ID).Any(r => r.ID == entity.RegionID))
                     return new UnauthorizedResult();
 
+                var ObjectToBeUpdated = agent.GetSource(id,false);
+
                 if (!User.IsInRole("Administrator"))
+                {
                     //only admin can change region
-                   entity.RegionID = ObjectToBeUpdated.RegionID;           
+                    entity.RegionID = ObjectToBeUpdated.RegionID;
+                    
+                }
 
                 if (id < 0 || !isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
-                return Ok(await agent.Update<Source>(id, entity));
+
+                return Ok(await agent.Update(id, entity));
             }
             catch (Exception ex)
             {
@@ -210,16 +205,13 @@ namespace WaterUseServices.Controllers
 
                 if (id < 1) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "invalid id"));
 
-                var ObjectToBeDeleted = agent.Select<Source>().Include(s => s.Region)
-                                            .ThenInclude(s => s.RegionManagers).FirstOrDefault(x => x.ID == id);
+                var ObjectToBeDeleted = agent.GetSource(id,false);
+                if (ObjectToBeDeleted == null) return new NotFoundResult();
 
-                if (ObjectToBeDeleted.Region.RegionManagers.All(i => i.ManagerID != LoggedInUser().ID) && !User.IsInRole("Administrator"))
+                if (!User.IsInRole("Administrator") && !agent.GetManagedRegion(LoggedInUser().ID).Any(r => r.ID == ObjectToBeDeleted.RegionID))
                     return new UnauthorizedResult();
 
-
-                var entity = await agent.Find<Source>(id);
-                if (entity == null) return new NotFoundObjectResult(new Error());
-                await agent.Delete<Source>(entity);
+                await agent.Delete<Source>(id);
 
                 return Ok();
             }

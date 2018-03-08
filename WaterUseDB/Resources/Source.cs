@@ -24,7 +24,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public partial class Source
+    public partial class Source:IFacilityCode
     {
         [Required]
         public int ID { get; set; }

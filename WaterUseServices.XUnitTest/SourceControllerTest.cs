@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading;
 using WaterUseAgent.Resources;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using WiM.Security.Authentication.Basic;
 
 namespace WaterUseServices.XUnitTest
 {
@@ -26,15 +27,13 @@ namespace WaterUseServices.XUnitTest
         public SourcesController controller { get; private set; }
         public SourceTest() {
             //Arrange
-            controller = new RolesController(new InMemorySourceAgent());
+            controller = new SourcesController(new InMemoryAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
-
-
         }
         [Fact]
         public async Task GetAll()
-        {           
+        {          
 
             //Act
             var response = await controller.Get();
@@ -69,7 +68,7 @@ namespace WaterUseServices.XUnitTest
         public async Task Post()
         {
             //Arrange
-            var entity = new Role() {Name = "newRole", Description = "New mock role 3" };
+            var entity = new Source() {Name = "newRole", FacilityCode = "New mock role 3" };
    
 
             //Act
@@ -90,7 +89,7 @@ namespace WaterUseServices.XUnitTest
             //Arrange
             var get = await controller.Get(1);
             var okgetResult = Assert.IsType<OkObjectResult>(get);
-            var entity = Assert.IsType<Role>(okgetResult.Value);
+            var entity = Assert.IsType<Source>(okgetResult.Value);
 
             entity.Name = "editedName";
 
@@ -99,10 +98,10 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<Role>(okResult.Value);
+            var result = Assert.IsType<Source>(okResult.Value);
 
             Assert.Equal(entity.Name, result.Name);
-            Assert.Equal(entity.Description, result.Description);
+            Assert.Equal(entity.FacilityCode, result.FacilityCode);
             Assert.Equal(entity.ID, result.ID);
         }
 
@@ -124,110 +123,5 @@ namespace WaterUseServices.XUnitTest
         }
     }
 
-    public class InMemorySourceAgent : IWaterUseAgent
-    {
-        private List<Role> Roles { get; set; }
-        public bool IncludePermittedWithdrawals { set => throw new NotImplementedException(); }
-
-        public InMemorySourceAgent() {
-           this.Roles = new List<Role>()
-            { new Role() { ID=1,Name= "MockTestRole1", Description="test mock role 1" },
-                new Role() { ID=2,Name= "MockTestRole2", Description="test mock role 2" }};
-        
-    }
-
-        public Task<T> Add<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                Roles.Add(item as Role);
-            }
-            return Task.Run(()=> { return item; });
-        }
-
-        public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                Roles.AddRange(items.Cast<Role>());
-            }
-            return Task.Run(() => { return Roles.Cast<T>(); });
-        }
-
-        public Task Delete<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {                
-                return Task.Run(()=> { this.Roles.Remove(item as Role); });
-            }
-
-            else
-                throw new Exception("not of correct type");
-        }
-
-        public Task<T> Find<T>(int pk) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-                return Task.Run(()=> { return Roles.Find(i => i.ID == pk) as T; });
-
-            throw new Exception("not of correct type");
-        }
-
-        public Manager GetManagerByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<Role> GetRoles()
-        {
-            return this.Roles.AsQueryable();
-        }
-
-        public IQueryable<T> Select<T>() where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-                return this.Roles.AsQueryable() as IQueryable<T>;
-
-            throw new Exception("not of correct type");
-        }
-
-        public Task<T> Update<T>(int pkId, T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Role))
-            {
-                var index = this.Roles.FindIndex(x=>x.ID == pkId);
-                (item as Role).ID = pkId; 
-                this.Roles[index] = item as Role;
-            }
-            throw new Exception("not of correct type");
-        }
-
-        public Wateruse GetWateruse(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Wateruse GetWateruse(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-    }
-    public class InMemoryModelValidator : IObjectModelValidator
-    {
-        public void Validate(ActionContext actionContext, ValidationStateDictionary validationState, string prefix, object model)
-        {
-            //assume all is valid
-            return;
-        }        
-    }
+    
 }

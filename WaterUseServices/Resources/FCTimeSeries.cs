@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using WaterUseDB.Resources;
 namespace WaterUseServices.Resources
 {
-    public class FCTimeSeries
+    public class FCTimeSeries:IFacilityCode
     {
         [Required]
         public string FacilityCode { get; set; }

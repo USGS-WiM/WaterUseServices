@@ -30,6 +30,8 @@ using WaterUseAgent.Resources;
 using System.Globalization;
 using System.Threading.Tasks;
 using WiM.Security.Authentication.Basic;
+using WaterUseAgent.Extensions;
+
 
 namespace WaterUseAgent
 {
@@ -44,6 +46,15 @@ namespace WaterUseAgent
         Configuration RegionConfigureationAsync(int regionID);
         Task<T> Update<T>(Int32 pkId, T item) where T : class, new();
         Task Delete<T>(T item) where T : class, new();
+        Task Delete<T>(Int32 id) where T : class, new();
+        IEnumerable<Source> GetSources(IEnumerable<Region> regions = null, bool removeFCIDcode=true);
+        Source GetSource(Int32 ID, bool removeFCIDcode=true);
+        Task<Source> Add(Source item);
+        Task<Source> Update(Int32 pkId, Source item);
+
+        IQueryable<Region> GetManagedRegion(Int32 ManagerID);
+        IQueryable<Region> GetRegions();
+
         IQueryable<Role> GetRoles();
         IBasicUser GetUserByUsername(string username);
         Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear);
@@ -159,8 +170,84 @@ namespace WaterUseAgent
 
 
         }
+        public IQueryable<Region> GetManagedRegion(Int32 ManagerID)
+        {
+            IQueryable<Region> regionquery = null;
+            try
+            {
+                regionquery = GetRegions();
+                regionquery = regionquery.Include(s => s.RegionManagers).Where(s => s.RegionManagers.Any(rm => rm.ManagerID == ManagerID));
+
+                return regionquery;
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error querying Managed Region " + ex.Message);
+                throw;
+            }
+        }
+        public IQueryable<Region> GetRegions()
+        {
+            try
+            {
+                return base.Select<Region>();
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error querying Region " + ex.Message);
+                throw;
+            }
+        }
         #endregion
         #region Source
+        public IEnumerable<Source> GetSources(IEnumerable<Region> regions = null, bool removeFCIDcode = true)
+        {
+            IQueryable<Source> query = null;
+            try
+            {
+                var regionID = regions.ToList().Select(i => i.ID);
+                query = base.Select<Source>();
+                if (regions != null)
+                    query = query.Where(s=>regionID.Contains(
+                        s.RegionID));
+
+                if (removeFCIDcode)
+                    query = query.AsEnumerable().RemoveFCFIPCode<Source>().AsQueryable();
+                return query;
+
+            }
+            catch (Exception ex)
+            {
+                sm(WiM.Resources.MessageType.error, "Error querying source "+ex.Message);
+                throw;
+            } 
+        }
+        public Source GetSource(Int32 ID, bool removeFCIDcode)
+        {
+            var source = base.Find<Source>(ID).Result;
+            if (removeFCIDcode) source?.RemoveFCFIPCode();
+            return source;
+        }
+        public Task<Source> Add(Source item)
+        {
+
+            item.AddFCFIPCode(GetRegionByIDOrShortName(item.RegionID.ToString()).FIPSCode);
+
+            return base.Add<Source>(item);
+        }
+        public Task<Source> Update(Int32 pkId, Source item)
+        {
+
+            item.AddFCFIPCode(GetRegionByIDOrShortName(item.RegionID.ToString()).FIPSCode);
+
+            return base.Update<Source>(pkId, item);
+        }
+        public Task Delete<T>(Int32 id) where T : class, new() 
+        {
+            var entity = base.Find<T>(id).Result;
+            if (entity == null) return new Task(null);
+            return base.Delete<T>(entity);
+        }
         #endregion
         #region Summary
         public Wateruse GetWateruse(List<string> sources, Int32 startyear, Int32? endyear)

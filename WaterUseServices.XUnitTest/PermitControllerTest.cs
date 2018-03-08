@@ -26,7 +26,7 @@ namespace WaterUseServices.XUnitTest
         public PermitsController controller { get; private set; }
         public PermitTest() {
             //Arrange
-            controller = new PermitsController(new InMemoryPermitAgent());
+            controller = new PermitsController(new InMemoryAgent());
             //must set explicitly for tests to work
             controller.ObjectValidator = new InMemoryModelValidator();
         }
@@ -56,7 +56,7 @@ namespace WaterUseServices.XUnitTest
    
 
             //Act
-            var response = await controller.Post(entity);
+            var response = await controller.Post(1, entity);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
@@ -70,7 +70,7 @@ namespace WaterUseServices.XUnitTest
         public async Task Put()
         {
             //Arrange
-            var get = await controller.Get(1);
+            var get = await controller.GetSourcePermit(1);
             var okgetResult = Assert.IsType<OkObjectResult>(get);
             var entity = Assert.IsType<Permit>(okgetResult.Value);
 
@@ -93,7 +93,7 @@ namespace WaterUseServices.XUnitTest
             //Act
             await controller.Delete(1);
 
-            var response = await controller.Get();
+            var response = await controller.GetSourcePermit(1);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
@@ -102,104 +102,5 @@ namespace WaterUseServices.XUnitTest
             Assert.Equal(1, result.Count());
             Assert.Equal("MockTestPermit2", result.LastOrDefault().PermitNO);
         }
-    }
-
-    public class InMemoryPermitAgent : IWaterUseAgent
-    {
-        private List<Permit> Permits { get; set; }
-
-        public InMemoryPermitAgent() {
-           this.Permits = new List<Permit>()
-            { new Permit() { ID=1,PermitNO="MockTestPermit1" },
-                new Permit() { ID=2, PermitNO= "MockTestPermit2"} };
-        
-    }
-
-        public Task<T> Add<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-            {
-                Permits.Add(item as Permit);
-            }
-            return Task.Run(()=> { return item; });
-        }
-
-        public Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-            {
-                Permits.AddRange(items.Cast<Permit>());
-            }
-            return Task.Run(() => { return Permits.Cast<T>(); });
-        }
-
-        public Task Delete<T>(T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-            {                
-                return Task.Run(()=> { this.Permits.Remove(item as Permit); });
-            }
-
-            else
-                throw new Exception("not of correct type");
-        }
-
-        public Task<T> Find<T>(int pk) where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-                return Task.Run(()=> { return Permits.Find(i => i.ID == pk) as T; });
-
-            throw new Exception("not of correct type");
-        }
-
-        public Manager GetManagerByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<Role> GetRoles()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<T> Select<T>() where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-                return this.Permits.AsQueryable() as IQueryable<T>;
-
-            throw new Exception("not of correct type");
-        }
-
-        public Task<T> Update<T>(int pkId, T item) where T : class, new()
-        {
-            if (typeof(T) == typeof(Permit))
-            {
-                var index = this.Permits.FindIndex(x=>x.ID == pkId);
-                (item as Permit).ID = pkId; 
-                this.Permits[index] = item as Permit;
-            }
-            throw new Exception("not of correct type");
-        }
-
-        public Wateruse GetWateruse(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Wateruse GetWateruse(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(List<string> sources, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDictionary<string, Wateruse> GetWaterusebySource(object basin, int startyear, int? endyear)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }
