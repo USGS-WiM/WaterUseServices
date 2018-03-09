@@ -113,7 +113,7 @@ namespace WaterUseServices.Controllers
 
                 if (!isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest, "One or more of the properties are invalid.")); // This returns HTTP 400
                
-                return Ok(await agent.Add(entity));
+                return Ok(agent.Add(entity));
             }
             catch (Exception ex)
             {
@@ -149,7 +149,7 @@ namespace WaterUseServices.Controllers
                 for (int i = 0; i < entities.Count; i++)
                 {
                     var s = entities[i];
-                    entities[i].AddFCFIPCode(fcipcode[s.RegionID]);
+                    
                     if (!isValid(s))
                     {
                         msgs.Add(i, new Error(errorEnum.e_badRequest));
@@ -160,8 +160,8 @@ namespace WaterUseServices.Controllers
 
 
                 if (!isOK) return new BadRequestObjectResult(msgs);
-
-                return Ok(await agent.Add<Source>(entities));
+               
+                return Ok(agent.Add(entities));
             }
             catch (Exception ex)
             {
@@ -189,7 +189,7 @@ namespace WaterUseServices.Controllers
 
                 if (id < 0 || !isValid(entity)) return new BadRequestObjectResult(new Error(errorEnum.e_badRequest)); // This returns HTTP 400
 
-                return Ok(await agent.Update(id, entity));
+                return Ok(agent.Update(id, entity));
             }
             catch (Exception ex)
             {

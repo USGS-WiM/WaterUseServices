@@ -76,7 +76,7 @@ namespace WaterUseServices.Controllers
             try
             {
                 
-                var entityFClist = entities.AddFCFIPCode(agent.GetRegionByIDOrShortName(regionID.ToString()).FIPSCode).Select(e => e.FacilityCode).ToList();
+                var entityFClist = entities.AddFCFIPCode(agent.GetRegionByIDOrShortName(regionID.ToString()).FIPSCode).Select(e => e.FacilityCode).Distinct().ToList();
                 var regionSources = agent.Select<Source>().Where(s => s.RegionID == regionID && entityFClist.Contains(s.FacilityCode))
                                         .Include("Region.RegionManagers").ToList();
 

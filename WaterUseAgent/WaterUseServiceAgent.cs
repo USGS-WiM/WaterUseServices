@@ -49,8 +49,9 @@ namespace WaterUseAgent
         Task Delete<T>(Int32 id) where T : class, new();
         IEnumerable<Source> GetSources(IEnumerable<Region> regions = null, bool removeFCIDcode=true);
         Source GetSource(Int32 ID, bool removeFCIDcode=true);
-        Task<Source> Add(Source item);
-        Task<Source> Update(Int32 pkId, Source item);
+        Source Add(Source item);
+        IEnumerable<Source> Add(List<Source> items);
+        Source Update(Int32 pkId, Source item);
 
         IQueryable<Region> GetManagedRegion(Int32 ManagerID);
         IQueryable<Region> GetRegions();
@@ -109,7 +110,7 @@ namespace WaterUseAgent
         public new Task<T> Add<T>(T item) where T : class, new()
         {
             return base.Add<T>(item);
-        }
+        }        
         public new Task<IEnumerable<T>> Add<T>(List<T> items) where T : class, new()
         {
             return base.Add<T>(items);
@@ -228,19 +229,24 @@ namespace WaterUseAgent
             if (removeFCIDcode) source?.RemoveFCFIPCode();
             return source;
         }
-        public Task<Source> Add(Source item)
+        public IEnumerable<Source> Add(List<Source> items)
         {
-
-            item.AddFCFIPCode(GetRegionByIDOrShortName(item.RegionID.ToString()).FIPSCode);
-
-            return base.Add<Source>(item);
+            items.ForEach(i=>i.AddFCFIPCode(GetRegionByIDOrShortName(i.RegionID.ToString()).FIPSCode));
+            return base.Add<Source>(items).Result.RemoveFCFIPCode();
         }
-        public Task<Source> Update(Int32 pkId, Source item)
+        public Source Add(Source item)
         {
 
             item.AddFCFIPCode(GetRegionByIDOrShortName(item.RegionID.ToString()).FIPSCode);
 
-            return base.Update<Source>(pkId, item);
+            return base.Add<Source>(item).Result.RemoveFCFIPCode();
+        }
+        public Source Update(Int32 pkId, Source item)
+        {
+
+            item.AddFCFIPCode(GetRegionByIDOrShortName(item.RegionID.ToString()).FIPSCode);
+
+            return base.Update<Source>(pkId, item).Result.RemoveFCFIPCode();
         }
         public Task Delete<T>(Int32 id) where T : class, new() 
         {
