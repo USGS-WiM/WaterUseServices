@@ -61,6 +61,8 @@ namespace WaterUseServices.Controllers
         {
             try
             {
+                //Must clear ModelState before validation to ensure any manual updates are applied during validation.
+                ModelState.Clear();
                 var isvalid = this.TryValidateModel(item);
                 return isvalid;
             }

@@ -113,7 +113,7 @@ namespace WaterUseServices.Controllers
                 entity.Salt = Cryptography.CreateSalt();
                 entity.Password = Cryptography.GenerateSHA256Hash(entity.Password, entity.Salt);
 
-                if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                if (!isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
                 var x = await agent.Add<Manager>(entity);
                 //remove info not relevant
                 x.Salt = string.Empty;
