@@ -37,8 +37,7 @@ namespace WaterUseServices.Controllers
     {
         public TimeSeriesController(IWaterUseAgent sa) : base(sa)
         {}
-        #region METHODS
-        
+        #region METHODS        
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {

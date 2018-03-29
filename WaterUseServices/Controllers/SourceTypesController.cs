@@ -28,9 +28,9 @@ using System.Collections.Generic;
 namespace WaterUseServices.Controllers
 {
     [Route("[controller]")]
-    public class UseTypesController : WUControllerBase
+    public class SourceTypesController : WUControllerBase
     {
-        public UseTypesController(IWaterUseAgent sa):base(sa)
+        public SourceTypesController(IWaterUseAgent sa):base(sa)
         { }
         #region METHODS
         [HttpGet]
@@ -38,7 +38,7 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                return Ok(agent.Select<UseType>());
+                return Ok(agent.Select<SourceType>());
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(await agent.Find<UseType>(id));
+                return Ok(await agent.Find<SourceType>(id));
             }
             catch (Exception ex)
             {
@@ -63,12 +63,12 @@ namespace WaterUseServices.Controllers
         }
         
         [HttpPost][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Post([FromBody]UseType entity)
+        public async Task<IActionResult> Post([FromBody]SourceType entity)
         {
             try
             {
                 if (!isValid(entity)) return new BadRequestResult();
-                return Ok(await agent.Add<UseType>(entity));
+                return Ok(await agent.Add<SourceType>(entity));
             }
             catch (Exception ex)
             {
@@ -78,13 +78,13 @@ namespace WaterUseServices.Controllers
 
         [HttpPost][Authorize(Policy = "AdminOnly")]
         [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<UseType> entities)
+        public async Task<IActionResult> Batch([FromBody]List<SourceType> entities)
         {
             try
             {
                 if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
 
-                return Ok(await agent.Add<UseType>(entities));
+                return Ok(await agent.Add<SourceType>(entities));
             }
             catch (Exception ex)
             {
@@ -93,12 +93,12 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Put(int id, [FromBody]UseType entity)
+        public async Task<IActionResult> Put(int id, [FromBody]SourceType entity)
         {
             try
             {
                 if (id < 1 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(await agent.Update<UseType>(id, entity));
+                return Ok(await agent.Update<SourceType>(id, entity));
             }
             catch (Exception ex)
             {
@@ -114,9 +114,9 @@ namespace WaterUseServices.Controllers
             {
 
                 if (id < 1) return new BadRequestResult();
-                var entity = await agent.Find<UseType>(id);
+                var entity = await agent.Find<SourceType>(id);
                 if (entity == null) return new NotFoundResult();
-                await agent.Delete<UseType>(entity);
+                await agent.Delete<SourceType>(entity);
 
                 return Ok();
             }

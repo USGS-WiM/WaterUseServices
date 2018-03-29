@@ -61,7 +61,7 @@ namespace WaterUseServices.Controllers
 
         }
 
-        [HttpGet("/Login")]
+        [HttpGet("Login")]
         [Authorize(Policy = "Restricted")]
         public async Task<IActionResult> GetLoggedInUser()
         {

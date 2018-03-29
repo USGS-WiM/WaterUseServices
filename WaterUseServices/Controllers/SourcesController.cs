@@ -38,7 +38,7 @@ namespace WaterUseServices.Controllers
         #region METHODS
         [HttpGet]
         [Authorize(Policy = "Restricted")]
-        public async Task<IActionResult> Get([FromQuery] int? RegionID = null)
+        public async Task<IActionResult> Get([FromQuery] int? regionID = null)
         {
             IQueryable<Region> regionquery = null;
             try
@@ -55,9 +55,9 @@ namespace WaterUseServices.Controllers
                     regionquery = agent.GetRegions();
                 }
 
-                if (RegionID.HasValue)
+                if (regionID.HasValue)
                 {
-                    regionquery = regionquery.Where(s => s.ID == RegionID);
+                    regionquery = regionquery.Where(s => s.ID == regionID);
                     if (regionquery.Count() < 1) return new BadRequestObjectResult(new Error(errorEnum.e_unauthorize, "User unauthorized, or invalid region requested"));
                 }
 
