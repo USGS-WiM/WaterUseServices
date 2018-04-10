@@ -34,7 +34,7 @@ namespace WaterUseServices.Controllers
         { }
 
         #region METHOD
-        [HttpGet("Regions/{region}/Config")]
+        [HttpGet("/Regions/{region}/Config")]
         public async Task<IActionResult> Config(string region)
         {
             try

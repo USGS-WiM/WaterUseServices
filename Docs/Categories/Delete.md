@@ -1,2 +1,4 @@
 ## Delete Category Resource
-Deletes a catagory
+<span style="color:red">** **Administrators only** **  
+Requires authentication</span>  
+Deletes a category

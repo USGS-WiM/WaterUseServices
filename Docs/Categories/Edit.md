@@ -1,2 +1,4 @@
 ## Edits a Category Resource
-Edits a catagory.
+<span style="color:red">** **Administrators only** **  
+Requires authentication</span>  
+Edits a category.

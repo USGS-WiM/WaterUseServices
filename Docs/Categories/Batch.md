@@ -22,21 +22,6 @@ Response as shown in the following sample.
     "description":"Description of Category Sample 3",
     "code":"UniqueCode3"
 }];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        crossDomain: true,
-        data: JSON.stringify(listOfCategories),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
 ```
 Response result will return the List of categories, with corresponding ID's. Similar to following example:
 
