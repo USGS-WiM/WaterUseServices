@@ -1,4 +1,3 @@
 ## Delete a Manager
-<span style="color:red">** **Administrators only** **  
-Requires authentication</span>  
+<span style="color:red">Requires Administrators Authentication</span> 
 Deletes a manager

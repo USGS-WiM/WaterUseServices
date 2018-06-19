@@ -1,3 +1,3 @@
 ## Available Category Resources
-Returns a list of all available catagories.
+Returns a list of all available categories.
 

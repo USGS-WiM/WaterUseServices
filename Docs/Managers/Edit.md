@@ -1,3 +1,3 @@
 ## Edits a Manager Resource
-<span style="color:red">Requires authentication</span>  
+<span style="color:red">Requires Authentication</span>  
 Edits a Manager.

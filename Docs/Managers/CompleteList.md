@@ -1,6 +1,5 @@
 ## Available Manager Resources
-<span style="color:red">** **Administrators only** **  
-Requires authentication</span> 
+<span style="color:red">Requires Administrators Authentication</span>  
 
 Returns an array of available manager resources currently provided by the services
 

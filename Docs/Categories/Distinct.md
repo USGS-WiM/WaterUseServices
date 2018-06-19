@@ -1,3 +1,3 @@
 ## Available Category Resource
-Returns a specific catagory.
+Returns a specific category.
 

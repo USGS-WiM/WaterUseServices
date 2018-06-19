@@ -1,5 +1,5 @@
 ## Login
-<span style="color:red">Requires authentication</span>  
+<span style="color:red">Requires Authentication</span>  
 Request authenticated users configuration.
 
 Response as shown in the following sample.

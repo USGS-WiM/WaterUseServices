@@ -1,5 +1,5 @@
 ## Region batch upload
-<span style="color:red">Requires authentication</span>  
+<span style="color:red">Requires Authentication</span>  
 Provides the ability to batch upload region source resources.
 
 Response as shown in the following sample.

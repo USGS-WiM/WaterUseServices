@@ -1,6 +1,5 @@
 ## Use Type Batch Upload
-<span style="color:red">** **Administrators only** **  
-Requires authentication</span>  
+<span style="color:red">Requires Administrators Authentication</span>  
 Provides the ability to batch upload use type resources.
 
 Response as shown in the following sample.
