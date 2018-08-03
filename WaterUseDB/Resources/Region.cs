@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace WaterUseDB.Resources
 {
-    public class Region
+    public partial class Region
     {
         [Required]
         public int ID { get; set; }
@@ -31,6 +31,9 @@ namespace WaterUseDB.Resources
         [Required]
         public string ShortName { get; set; }
         public string Description { get; set; }
+        //https://www.census.gov/geo/reference/ansi_statetables.html
+        [MaxLength(2)][Required]
+        public string FIPSCode { get; set; }
 
         public List<CatagoryCoefficient> CatagoryCoefficients { get;set; }
         public List<RegionManager> RegionManagers { get; set; }

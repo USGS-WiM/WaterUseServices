@@ -24,26 +24,34 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public class Source
+    public partial class Source:IFacilityCode
     {
         [Required]
         public int ID { get; set; }
+
         public string Name { get; set; }
         [Required]
         public string FacilityName { get; set; }
-        public string StationID { get; set; }
         [Required]
-        public int CatagoryTypeID { get; set; }
+        public string FacilityCode{ get; set; }
+
+        public string StationID { get; set; }
+
+        public int? CatagoryTypeID { get; set; }
         [Required]
         public int SourceTypeID { get; set; }
+        [Required]
+        public int UseTypeID { get; set; }
         [Required]
         public int RegionID { get; set; }
         [Required]
         public PostgisPoint Location { get; set; }
 
+
         public Region Region { get; set; }
         public CatagoryType CatagoryType { get; set; }
         public SourceType SourceType { get; set; }
+        public UseType UseType { get; set; }
         public List<Permit> Permits { get; set; }
         public List<TimeSeries> TimeSeries { get; set; }
     }

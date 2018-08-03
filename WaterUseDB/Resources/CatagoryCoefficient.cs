@@ -22,7 +22,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public class CatagoryCoefficient
+    public partial class CatagoryCoefficient
     {
         [Required]
         public int ID { get; set; }

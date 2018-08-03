@@ -22,57 +22,112 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using WaterUseDB.Resources;
+using WaterUseAgent;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace WaterUseServices.Controllers
 {
-    [Route("wateruse/[controller]")]
-    public class UnitsController : Controller
+    [Route("[controller]")]
+    public class UnitsController : WUControllerBase
     {
-        private WaterUseServices.Data.WaterUseServiceAgent agent;
+        public UnitsController(IWaterUseAgent sa) : base(sa)
+        { }
 
-        public UnitsController(WaterUseServices.Data.WaterUseServiceAgent sa) {
-            this.agent = sa;
-        }
-
+        #region METHOD
         [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(agent.Select<UnitType>());        
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if(id<0) return new BadRequestResult(); // This returns HTTP 404
-
-            return Ok(agent.Find<UnitType>(id));
-        }
-        
-        [HttpPost][Authorize(Policy = "Restricted")]
-        public IActionResult Post([FromBody]UnitType entity)
+        public async Task<IActionResult> Get()
         {
             try
             {
-                return Ok(agent.Add<UnitType>(entity));
+                return Ok(agent.Select<UnitType>());  
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return await HandleExceptionAsync(ex);
+            }      
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                if(id<0) return new BadRequestResult(); // This returns HTTP 404
+
+                return Ok(await agent.Find<UnitType>(id));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+        
+        [HttpPost][Authorize(Policy = "CanModify")]
+        public async Task<IActionResult> Post([FromBody]UnitType entity)
+        {
+            try
+            {
+                 if (!isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                return Ok(await agent.Add<UnitType>(entity));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
             }            
         }
-        
+
+        [HttpPost][Authorize(Policy = "AdminOnly")]
+        [Route("Batch")]
+        public async Task<IActionResult> Batch([FromBody]List<UnitType> entities)
+        {
+            try
+            {
+                if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
+
+                return Ok(await agent.Add<UnitType>(entities));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public IActionResult Put(int id, [FromBody]UnitType entity)
+        public async Task<IActionResult> Put(int id, [FromBody]UnitType entity)
         {
-            return Ok(agent.Update<UnitType>(id,entity));
-        }
-        
+            try
+            {
+                if (id < 0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
+                return Ok(await agent.Update<UnitType>(id,entity));
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+
+        }        
+
         [HttpDelete("{id}")][Authorize(Policy = "AdminOnly")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var role = agent.Find<UnitType>(id);
-            if(role != null)
-                agent.Delete<UnitType>(role);
+            try
+            {
+
+                if (id < 1) return new BadRequestResult();
+                var entity = await agent.Find<UnitType>(id);
+                if (entity == null) return new NotFoundResult();
+                await agent.Delete<UnitType>(entity);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
         }
+        #endregion
+        #region HELPER METHODS
+        #endregion
     }
 }

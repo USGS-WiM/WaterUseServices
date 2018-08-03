@@ -23,7 +23,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public class SourceType
+    public partial class SourceType
     {
         [Required]
         public int ID { get; set; }
