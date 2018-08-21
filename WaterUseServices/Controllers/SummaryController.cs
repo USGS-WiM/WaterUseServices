@@ -75,6 +75,7 @@ namespace WaterUseServices.Controllers
                 if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
+                if (computeReturns) agent.ComputeReturnsUsingConsumtiveUseCoefficients = computeReturns;
                 if (computeDomestic && basin != null) agent.ComputeDomesticWateruse(basin);
 
                 if (!string.IsNullOrEmpty(sources))
