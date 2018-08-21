@@ -38,16 +38,15 @@ namespace WaterUseServices.Controllers
         [HttpPost][HttpGet]
         public async Task<IActionResult> Get([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null, 
                                                 [FromQuery]string sources = "",[FromQuery]bool includePermits = false, 
-                                                [FromQuery]bool computeDomestic=false)
+                                                [FromQuery]bool computeDomestic=false, [FromQuery]bool computeReturns=false)
         {
             try
             {
                 if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
-
-                if (computeDomestic)
-                    agent.ComputeDomesticWateruse();
+                if (computeReturns) agent.ComputeReturnsUsingConsumtiveUseCoefficients = computeReturns;
+                if (computeDomestic && basin != null) agent.ComputeDomesticWateruse(basin);                
 
                 if (!string.IsNullOrEmpty(sources))
                 {
@@ -69,16 +68,14 @@ namespace WaterUseServices.Controllers
         [Route("BySource")]
         public async Task<IActionResult> BySource([FromQuery] Int32 year,[FromQuery]Int32? endyear = null,[FromBody] object basin = null,
                                                     [FromQuery]string sources = "",[FromQuery]bool includePermits = false,
-                                                    [FromQuery]bool computeDomestic = false)
+                                                    [FromQuery]bool computeDomestic = false, [FromQuery]bool computeReturns = false)
         {
             try
             {
                 if (year < 1950 || (basin == null && string.IsNullOrEmpty(sources))) return new BadRequestResult(); //return HTTP 404
 
                 if (includePermits) agent.IncludePermittedWithdrawals = includePermits;
-
-                if (computeDomestic)
-                    agent.ComputeDomesticWateruse();
+                if (computeDomestic && basin != null) agent.ComputeDomesticWateruse(basin);
 
                 if (!string.IsNullOrEmpty(sources))
                 {
