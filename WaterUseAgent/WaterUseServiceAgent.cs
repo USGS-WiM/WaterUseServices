@@ -69,7 +69,7 @@ namespace WaterUseAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
         public bool ComputeReturnsUsingConsumtiveUseCoefficients { private get; set; }
-        private Double? DomesticUse { get; set; }     
+        private Domestic DomesticUse { get; set; }     
 
         public WaterUseServiceAgent(WaterUseDBContext context) : base(context) {
             this.IncludePermittedWithdrawals = false;
@@ -346,11 +346,11 @@ namespace WaterUseAgent
                     context.Database.OpenConnection();
                     using (System.Data.Common.DbDataReader reader = command.ExecuteReader())
                     {
-                        this.DomesticUse = 0;
+                        this.DomesticUse = new Domestic();
                         while (reader.Read())
                         {
-                            if (reader["name"].ToString() == "gw") this.DomesticUse += Convert.ToDouble(reader["value"]);
-                            if (reader["name"].ToString() == "sw") this.DomesticUse += Convert.ToDouble(reader["value"]);
+                            if (reader["name"].ToString() == "gw") this.DomesticUse.GroundWater = Convert.ToDouble(reader["value"]);
+                            if (reader["name"].ToString() == "sw") this.DomesticUse.SurfaceWater = Convert.ToDouble(reader["value"]);
                         }
                     }//end using  
                 }//end using 
@@ -442,7 +442,7 @@ namespace WaterUseAgent
                 if (this.IncludePermittedWithdrawals)
                     pmtlist = sources.Where(s=>s.Permits !=null).SelectMany(s => s.Permits).Where(p => p.StartDate.HasValue && p.StartDate.Value.Year >= startyear && 
                                                                                 p.StartDate.Value.Year <= endyear.Value).ToList();
-                if (this.DomesticUse.HasValue)
+                if (this.DomesticUse != null)
                     tslist.AddRange(getDomesticTimeseries(startyear,endyear.Value));
 
                 if (tslist.Count < 1) return null;
@@ -583,15 +583,25 @@ namespace WaterUseAgent
             {
 
                 for (int i = startyear; i <= endyear; i++)
-                {                    
+                {
+                    if (DomesticUse.GroundWater.HasValue)
                         domesticTS.AddRange(Enumerable.Range(1, 12).Select(r => new TimeSeries()
                         {
                             Date = new DateTime(i, r, 1),
                             UnitType = new UnitType() { Abbreviation = "MGD", Name = "Million Gallons per Day" },
-                            Source = new Source() { SourceType = new SourceType() { Code = "SW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
-                            Value = DomesticUse.Value
+                            Source = new Source() { UseType = new UseType() { Name= "Withdrawal" }, SourceType = new SourceType() { Code = "GW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
+                            Value = DomesticUse.GroundWater.Value
                         }));
-                   
+
+                    if (DomesticUse.SurfaceWater.HasValue)
+                        domesticTS.AddRange(Enumerable.Range(1, 12).Select(r => new TimeSeries()
+                        {
+                            Date = new DateTime(i, r, 1),
+                            UnitType = new UnitType() { ID = 1, Abbreviation = "MGD", Name = "Million Gallons per Day" },
+                            Source = new Source() { UseType = new UseType() { Name = "Withdrawal" }, SourceType = new SourceType() { Code = "SW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
+                            Value = DomesticUse.SurfaceWater.Value
+                        }));
+
                 }//next yr
 
                 return domesticTS;
