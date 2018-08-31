@@ -3,22 +3,18 @@
 
 Returns an array of available manager resources currently provided by the services
 
-Results returned by each response as shown in the following sample or by selecting the below load response button below;
-#### Sample Request
-```
-	$.ajax({
-		url: url,
-		success: function(resultData) { 
-			var result = resultData;
-		},
-		error: function() {
-			control.state('error');
-		}
-	});
-```
-Response result will return the an array of manager resources, such as:
+### Example
+Web service request can be performed using most HTTP client libraries. The following illustrated a typical http request/response performed by a client application.
 
 ```
+GET /wateruseservices/managers HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+Authentication: Basic ************
+
+```
+```
+HTTP/1.1 200 OK
 [{
 	"id":1,
     "firstname":"testLogin",

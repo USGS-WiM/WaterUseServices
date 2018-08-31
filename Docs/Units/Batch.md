@@ -2,10 +2,17 @@
 <span style="color:red">Requires Administrators Authentication</span>   
 Provides the ability to batch upload unit resources.
 
-Response as shown in the following sample.
-#### Sample Request
+
+#### Request Example
+The REST URL section below displays the example url and the body/payload of the request used to simulate a response.
+
 ```
-	var listOfUnits = 
+POST /wateruseservices/units/batch HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+content-type: application/json;charset=UTF-8
+content-length: 576
+
 [{
     "name":"unitSample 1",
     "abbreviation":"US1"
@@ -13,26 +20,11 @@ Response as shown in the following sample.
 {
     "name":"unitSample 2",
     "abbreviation":"US2"
-}];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        crossDomain: true,
-        data: JSON.stringify(listOfSourceTypes),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
+}]
 ```
-Response result will return the List of units, with corresponding ID's. Similar to following example:
 
 ```
+HTTP/1.1 200 OK
 [{
 	"id":1,
     "name":"unitSample 1",

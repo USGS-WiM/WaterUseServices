@@ -2,10 +2,17 @@
 <span style="color:red">Requires Administrators Authentication</span>  
 Provides the ability to batch upload use type resources.
 
-Response as shown in the following sample.
-#### Sample Request
+
+#### Request Example
+The REST URL section below displays the example url and the body/payload of the request used to simulate a response.
+
 ```
-	var listOfusetypes = 
+POST /wateruseservices/usetypes/batch HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+content-type: application/json;charset=UTF-8
+content-length: 576
+
 [{
     "name":"use type Sample 1",
     "code":"Ut1"
@@ -15,26 +22,11 @@ Response as shown in the following sample.
     "name":"use type Sample 2",
     "code":"Ut2",
 	"description":"use type sample 2"
-}];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        crossDomain: true,
-        data: JSON.stringify(listOfusetypes),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
+}]
 ```
-Response result will return the List of use types, with corresponding ID's. Similar to following example:
 
 ```
+HTTP/1.1 200 OK
 [{
 	"id":1,
     "name":"use type Sample 1",
@@ -46,5 +38,5 @@ Response result will return the List of use types, with corresponding ID's. Simi
     "name":"use type Sample 2",
     "code":"Ut2",
 	"description":"use type sample 2"
-}];
+}]
 ```

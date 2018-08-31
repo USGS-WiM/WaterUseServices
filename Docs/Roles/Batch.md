@@ -3,9 +3,16 @@
 Provides the ability to batch upload role resources.
 
 Response as shown in the following sample.
-#### Sample Request
+#### Request Example
+The REST URL section below displays the example url and the body/payload of the request used to simulate a response.
+
 ```
-	var listOfNewRoles = 
+POST /wateruseservices/roles/batch HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+content-type: application/json;charset=UTF-8
+content-length: 176
+
 [
 	{
     "name":"testRole1",
@@ -15,25 +22,11 @@ Response as shown in the following sample.
     "name":"testRole2",
     "description":"Description of role2"
 	}
-];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        data: JSON.stringify(listOfNewRoles),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
+]
 ```
-Response result will return the List of Roles, with corresponding ID's. Similar to following example:
 
 ```
+HTTP/1.1 200 OK
 [
 	{
 	"id":1,

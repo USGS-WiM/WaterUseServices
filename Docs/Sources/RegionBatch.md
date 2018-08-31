@@ -2,10 +2,14 @@
 <span style="color:red">Requires Authentication</span>  
 Provides the ability to batch upload region source resources.
 
-Response as shown in the following sample.
-#### Sample Request
+####Example
 ```
-	var listOfsources = 
+POST /wateruseservices/Regions/2/Sources/Batch HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+content-type: application/json;charset=UTF-8
+content-length: 576
+
 [
 	{
 	"name": "test source",
@@ -35,26 +39,10 @@ Response as shown in the following sample.
 		"srid": 4269
 		}
 	}
-];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        crossDomain: true,
-        data: JSON.stringify(listOfNewRegions),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
+]
 ```
-Response result will return the List of region sources, with corresponding ID's. Similar to following example:
-
 ```
+HTTP/1.1 200 OK
 [
 	{
 	"id":1,
@@ -86,5 +74,5 @@ Response result will return the List of region sources, with corresponding ID's.
 		"srid": 4269
 		}
 	}
-];
+]
 ```

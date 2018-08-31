@@ -1,11 +1,16 @@
 ## Status batch upload
 <span style="color:red">Requires Administrators Authentication</span>  
 Provides the ability to batch upload Status resources.
+#### Request Example
+The REST URL section below displays the example url and the body/payload of the request used to simulate a response.
 
-Response as shown in the following sample.
-#### Sample Request
 ```
-	var listOfStatus = 
+POST /wateruseservices/status/batch HTTP/1.1
+Host: streamstats.usgs.gov
+Accept: application/json
+content-type: application/json;charset=UTF-8
+content-length: 576
+
 [{
     "name":"StatusSample 1",
     "description":"Description of Status Sample 1",
@@ -20,26 +25,11 @@ Response as shown in the following sample.
     "name":"StatusSample 3",
     "description":"Description of Status Sample 3",
     "code":"UniqueCode3"
-}];
-
-$.ajax({
-        type: 'POST',
-        url: url,
-        crossDomain: true,
-        data: JSON.stringify(listOfStatus),
-        dataType: 'json',
-        contentType: 'application/json; charset=UTF-8',
-        success: function(resultData) { 
-            var results = resultData;
-        },
-        error: function() {
-            control.state('error');
-        }
-    });
+}]
 ```
-Response result will return the List of categories, with corresponding ID's. Similar to following example:
 
 ```
+HTTP/1.1 200 OK
 [{
 	"id":51,
     "name":"Status Sample 1",

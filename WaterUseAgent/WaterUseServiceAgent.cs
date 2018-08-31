@@ -38,7 +38,8 @@ namespace WaterUseAgent
     public interface IWaterUseAgent
     {
         Boolean IncludePermittedWithdrawals {set; }
-        void ComputeDomesticWateruse();
+        Boolean ComputeReturnsUsingConsumtiveUseCoefficients { set; }
+        void ComputeDomesticWateruse(object basin);
         IQueryable<T> Select<T>() where T : class, new();
         Task<T> Find<T>(Int32 pk) where T : class, new();
         Task<T> Add<T>(T item) where T : class, new();
@@ -67,9 +68,11 @@ namespace WaterUseAgent
     public class WaterUseServiceAgent : DBAgentBase, IWaterUseAgent, IBasicUserAgent
     {
         public bool IncludePermittedWithdrawals { private get; set; }
+        public bool ComputeReturnsUsingConsumtiveUseCoefficients { private get; set; }
         private Domestic DomesticUse { get; set; }     
 
         public WaterUseServiceAgent(WaterUseDBContext context) : base(context) {
+            this.IncludePermittedWithdrawals = false;
 
             //optimize query for disconnected databases.
             this.context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -85,7 +88,7 @@ namespace WaterUseAgent
                 return new Configuration()
                             {
                                 HasPermits = sourcequery.Any(s => s.Permits.Count > 0),
-                                HasReturns = Select<CatagoryCoefficient>().Any(cc => cc.RegionID == regionID),
+                                CanComputeReturns = Select<CatagoryCoefficient>().Any(cc => cc.RegionID == regionID),
                                 MaxYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Max().Year,
                                 MinYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Min().Year,
                                 Units = "MGD"
@@ -93,7 +96,6 @@ namespace WaterUseAgent
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -334,17 +336,38 @@ namespace WaterUseAgent
             }
         }
 
-        public void ComputeDomesticWateruse() {
-
-            this.DomesticUse = new Domestic()
+        public void ComputeDomesticWateruse(object basin) {
+            //https://github.com/aspnet/EntityFrameworkCore/issues/7810#issuecomment-384909854
+            try
             {
-                GroundWater = 1.728,
-                SurfaceWater = 0.035
-            };
+                using (var command = this.context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = String.Format(getSQLStatement(sqlTypes.e_domesticsummarystats), basin, 4326);
+                    context.Database.OpenConnection();
+                    using (System.Data.Common.DbDataReader reader = command.ExecuteReader())
+                    {
+                        this.DomesticUse = new Domestic();
+                        while (reader.Read())
+                        {
+                            if (reader["name"].ToString() == "gw") this.DomesticUse.GroundWater = Convert.ToDouble(reader["value"]);
+                            if (reader["name"].ToString() == "sw") this.DomesticUse.SurfaceWater = Convert.ToDouble(reader["value"]);
+                        }
+                    }//end using  
+                }//end using 
+            }
+            catch (Exception ex)
+            {
+                this.DomesticUse = null;
+                return;
+            }
+            finally
+            {
+                if(context.Database.GetDbConnection().State == System.Data.ConnectionState.Open)
+                    context.Database.CloseConnection();
+            }
         }
         #endregion
  
-
         #region HELPER METHODS
         private Wateruse getAggregatedWaterUse(IQueryable<Source> sources, Int32 startyear, Int32? endyear)
         {
@@ -359,7 +382,7 @@ namespace WaterUseAgent
                     ProcessDate = DateTime.Now,
                     StartYear = startyear,
                     EndYear = endyear,
-                    Return = true ? getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
+                    Return = !ComputeReturnsUsingConsumtiveUseCoefficients ? getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
                                                                 "Return", StringComparison.OrdinalIgnoreCase)).ToList(), startyear, endyear): computeWaterUseSummaryReturns(sourceList,startyear,endyear),
                     Withdrawal = getWaterUseSummary(sourceList.Where(x=>String.Equals(x.UseType.Name,
                                                                 "Withdrawal",StringComparison.OrdinalIgnoreCase)).ToList(), startyear, endyear)
@@ -384,7 +407,7 @@ namespace WaterUseAgent
                                 ProcessDate = DateTime.Now,
                                 StartYear = startyear,
                                 EndYear = endyear,
-                                Return = true?getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
+                                Return = !ComputeReturnsUsingConsumtiveUseCoefficients ? getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
                                                                         "Return", StringComparison.OrdinalIgnoreCase))
                                                                     .Where(s => s.Equals(item)).ToList(), startyear, endyear):computeWaterUseSummaryReturns(sourceList.Where(s => s.Equals(item)).ToList(), startyear,endyear),
                                 Withdrawal = getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
@@ -443,7 +466,7 @@ namespace WaterUseAgent
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value/ mval.Select(x => x.Date.Year).Distinct().Count())
                         }),
-                        Code = mval.Any(i => i.Source.CatagoryTypeID.HasValue) ? mval.Where(cd=>cd.Source.CatagoryTypeID.HasValue).GroupBy(cd => cd.Source.CatagoryType.Code)
+                        Code = mval.Any(i => i.Source.CatagoryType != null) ? mval.Where(cd=>cd.Source.CatagoryType != null).GroupBy(cd => cd.Source.CatagoryType.Code)
                         .ToDictionary(ky => ky.Key, cval => new WateruseValue()
                         {
                             Name = cval.First().Source.CatagoryType.Name,
@@ -522,13 +545,13 @@ namespace WaterUseAgent
 
                 return new WateruseSummary()
                 {
-                    Annual = tslist != null && tslist.Count > 0 ? tslist.GroupBy(ts => ts.Source.SourceType.Code)
+                    Annual = tslist != null && tslist.Count > 0 ? tslist.GroupBy(ts => ts.Source.SourceType.Code)//gw/sw
                     .ToDictionary(ky => ky.Key, mval => new WateruseValue()
                     {
                         Name = mval.First().Source.SourceType.Name.Replace("withdrawal", "return"),
                         Description = "Daily Annual Average " + mval.First().Source.SourceType.Description,
                         Value = (mval.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))
-                                                - mval.Sum(ts => ts.multiplier * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year)))/yrspan,
+                                                - mval.Sum(ts => ts.multiplier * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))) / yrspan,
                         Unit = mval.First().UnitType
                     }) : null,
 
@@ -561,12 +584,12 @@ namespace WaterUseAgent
 
                 for (int i = startyear; i <= endyear; i++)
                 {
-                    if(DomesticUse.GroundWater.HasValue)
+                    if (DomesticUse.GroundWater.HasValue)
                         domesticTS.AddRange(Enumerable.Range(1, 12).Select(r => new TimeSeries()
                         {
                             Date = new DateTime(i, r, 1),
                             UnitType = new UnitType() { Abbreviation = "MGD", Name = "Million Gallons per Day" },
-                            Source = new Source() { SourceType = new SourceType() { Code = "GW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
+                            Source = new Source() { UseType = new UseType() { Name= "Withdrawal" }, SourceType = new SourceType() { Code = "GW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
                             Value = DomesticUse.GroundWater.Value
                         }));
 
@@ -574,10 +597,11 @@ namespace WaterUseAgent
                         domesticTS.AddRange(Enumerable.Range(1, 12).Select(r => new TimeSeries()
                         {
                             Date = new DateTime(i, r, 1),
-                            UnitType = new UnitType() { ID=1, Abbreviation = "MGD", Name = "Million Gallons per Day" },
-                            Source = new Source() { SourceType = new SourceType() { Code = "SW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
+                            UnitType = new UnitType() { ID = 1, Abbreviation = "MGD", Name = "Million Gallons per Day" },
+                            Source = new Source() { UseType = new UseType() { Name = "Withdrawal" }, SourceType = new SourceType() { Code = "SW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
                             Value = DomesticUse.SurfaceWater.Value
                         }));
+
                 }//next yr
 
                 return domesticTS;
@@ -616,7 +640,36 @@ namespace WaterUseAgent
                                 WHERE ""ID"" IN ('{0}') OR 
                                 LOWER(""FacilityCode"") IN ('{1}')";
 
+                case sqlTypes.e_domesticsummarystats:
+                    /*
+                    //https://postgis.net/docs/RT_ST_SummaryStats.html
+                    //https://gis.stackexchange.com/questions/260274/get-st-summarystats-from-raster-table-using-geojson-polygon
+                    return @"WITH clip(geom) AS
+                            (SELECT
+                                (ST_Transform(
+                                    ST_SetSRID(
+                                        ST_GeomFromGeoJSON('{0}'),
+                                    {1}),
+                                 4236))
+                            )
+                            SELECT SUBSTRING(filename,6,2) as name, 
+                            SUM ((ST_SummaryStats(ST_Clip(rast, geom, true))).SUM) as value
+                            FROM ""DomesticWateruseRasters"", clip
+                                    WHERE ST_Intersects(rast, geom) 
+                            GROUP BY filename;";
+                            */
+                    return @"
+                            SELECT
+                                SUBSTRING(filename,6,2) as name,
+                                (st_summarystats(st_clip(ST_Union(rast), st_transform(
+				                                st_setsrid(st_geomfromgeojson('{0}'),
+                                                {1}), 4236)), TRUE)).SUM as value
 
+                                FROM ""DomesticWateruseRasters""
+                                Where st_intersects(rast, st_transform(
+                                                st_setsrid(st_geomfromgeojson('{0}'),
+				                                {1}), 4236))
+                                GROUP BY filename;";
                 default:
                     throw new Exception("No sql for table " + type);
             }
@@ -626,7 +679,8 @@ namespace WaterUseAgent
         private enum sqlTypes
         {
             e_sourcebygeojson,
-            e_source
+            e_source,
+            e_domesticsummarystats
         }
         #endregion
     }
