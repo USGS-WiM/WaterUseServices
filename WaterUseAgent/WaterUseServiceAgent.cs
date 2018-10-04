@@ -382,7 +382,7 @@ namespace WaterUseAgent
                     ProcessDate = DateTime.Now,
                     StartYear = startyear,
                     EndYear = endyear,
-                    Return = !ComputeReturnsUsingConsumtiveUseCoefficients ? getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
+                    Return = ComputeReturnsUsingConsumtiveUseCoefficients ? getWaterUseSummary(sourceList.Where(x => String.Equals(x.UseType.Name, 
                                                                 "Return", StringComparison.OrdinalIgnoreCase)).ToList(), startyear, endyear): computeWaterUseSummaryReturns(sourceList,startyear,endyear),
                     Withdrawal = getWaterUseSummary(sourceList.Where(x=>String.Equals(x.UseType.Name,
                                                                 "Withdrawal",StringComparison.OrdinalIgnoreCase)).ToList(), startyear, endyear)
