@@ -514,7 +514,7 @@ namespace WaterUseAgent
                 if (!endyear.HasValue) endyear = startyear;
                 catCoeff = Select<CategoryCoefficient>().ToList();
 
-                tslist = sources.All(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)) ?sources.SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value)
+                tslist = sources.Where(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)).SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value)
                     .Select(ts=>new NetTimeSeries() {
                          Date = ts.Date,
                          ID = ts.ID,
@@ -524,11 +524,10 @@ namespace WaterUseAgent
                          UnitType = ts.UnitType,
                          multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CategoryCoefficient() { Value=0 }).FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CategoryTypeID == ts.Source.CategoryTypeID).Value,
                          Value =ts.Value
-                    }).ToList():null;
+                    }).ToList();
 
                 if (tslist.Count < 1) return null;
-                yrspan = tslist.Select(x => x.Date.Year).Distinct().Count();
-                if (this.DomesticUse != null && sources.All(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)))
+                if (this.DomesticUse != null)
                 {
                     //domestic id = 4
                     tslist.AddRange(getDomesticTimeseries(startyear, endyear.Value).Select(ts=>new NetTimeSeries() {
@@ -551,7 +550,7 @@ namespace WaterUseAgent
                         Name = mval.First().Source.SourceType.Name.Replace("withdrawal", "return"),
                         Description = "Daily Annual Average " + mval.First().Source.SourceType.Description,
                         Value = (mval.Sum(ts => ts.Value * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))
-                                                - mval.Sum(ts => ts.multiplier * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))) / yrspan,
+                                                - mval.Sum(ts => ts.multiplier * DateTime.DaysInMonth(ts.Date.Year, ts.Date.Month) / getDaysInYear(ts.Date.Year))) / mval.Select(x => x.Date.Year).Distinct().Count(),
                         Unit = mval.First().UnitType
                     }) : null,
 
@@ -564,8 +563,16 @@ namespace WaterUseAgent
                             Name = cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " " + cval.First().Source.SourceType.Name.Replace("withdrawal","return"),
                             Description = cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " daily monthly average",
                             Unit = cval.First().UnitType,
-                            Value = cval.Sum(ts => ts.Value / yrspan) - cval.Sum(ts => ts.multiplier / yrspan)
-                        })
+                            Value = cval.Sum(ts => ts.Value / mval.Select(x => x.Date.Year).Distinct().Count()) - cval.Sum(ts => ts.multiplier / mval.Select(x => x.Date.Year).Distinct().Count())
+                        })//,
+                        //Code = mval.Any(i => i.Source.CatagoryType != null) ? mval.Where(cd => cd.Source.CatagoryType != null).GroupBy(cd => cd.Source.CatagoryType.Code)
+                        //.ToDictionary(ky => ky.Key, cval => new WateruseValue()
+                        //{
+                        //    Name = cval.First().Source.CatagoryType.Name,
+                        //    Description = "Daily " + cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " average " + cval.First().Source.CatagoryType.Name,
+                        //    Unit = cval.First().UnitType,
+                        //    Value = cval.Sum(ts => ts.Value / mval.Select(x => x.Date.Year).Distinct().Count()) - cval.Sum(ts => ts.multiplier / mval.Select(x => x.Date.Year).Distinct().Count())
+                        //}) : null
                     }) : null
                 };
             }
