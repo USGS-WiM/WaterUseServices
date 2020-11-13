@@ -16,25 +16,24 @@
 //discussion:   POCO's arn't derived from special base classed nor do they return any special types for their properties.
 //              
 //
-//     
+//   
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace WaterUseDB.Resources
 {
-    public partial class CatagoryCoefficient
+    public partial class CategoryType
     {
         [Required]
         public int ID { get; set; }
         [Required]
-        public int CatagoryTypeID { get; set; }
+        public string Name { get; set; }
         [Required]
-        public int RegionID { get; set; }
-        public string Comments { get; set; }
-        [Required]
-        public double Value { get; set; }
+        public string Code { get; set; }
+        public string Description { get; set; }
 
-        public Region Region { get; set; }
-        public CatagoryType CatagoryType { get; set; }
+        List<CategoryCoefficient> CategoryCoefficients { get; set; }
+        List<Source> Sources { get; set; }
     }
 }

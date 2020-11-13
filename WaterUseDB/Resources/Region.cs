@@ -35,7 +35,7 @@ namespace WaterUseDB.Resources
         [MaxLength(2)][Required]
         public string FIPSCode { get; set; }
 
-        public List<CatagoryCoefficient> CatagoryCoefficients { get;set; }
+        public List<CategoryCoefficient> CategoryCoefficients { get;set; }
         public List<RegionManager> RegionManagers { get; set; }
         public List<Source> Sources { get; set; }
     }

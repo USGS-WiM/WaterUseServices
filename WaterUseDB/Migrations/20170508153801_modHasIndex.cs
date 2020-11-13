@@ -33,8 +33,8 @@ namespace WaterUseDB.Migrations
                 table: "Managers");
 
             migrationBuilder.DropUniqueConstraint(
-                name: "AK_CatagoryTypes_Code",
-                table: "CatagoryTypes");
+                name: "AK_CategoryTypes_Code",
+                table: "CategoryTypes");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Abbreviation",
@@ -79,8 +79,8 @@ namespace WaterUseDB.Migrations
                 column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes",
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes",
                 column: "Code");
         }
 
@@ -111,8 +111,8 @@ namespace WaterUseDB.Migrations
                 table: "Managers");
 
             migrationBuilder.DropIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes");
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Abbreviation",
@@ -159,8 +159,8 @@ namespace WaterUseDB.Migrations
                 column: "Username");
 
             migrationBuilder.AddUniqueConstraint(
-                name: "AK_CatagoryTypes_Code",
-                table: "CatagoryTypes",
+                name: "AK_CategoryTypes_Code",
+                table: "CategoryTypes",
                 column: "Code");
         }
     }
