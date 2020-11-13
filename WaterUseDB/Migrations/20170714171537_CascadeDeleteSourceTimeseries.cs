@@ -9,47 +9,47 @@ namespace WaterUseDB.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CatagoryCoefficient_CatagoryTypes_CatagoryTypeID",
-                table: "CatagoryCoefficient");
+                name: "FK_CategoryCoefficient_CategoryTypes_CategoryTypeID",
+                table: "CategoryCoefficient");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_CatagoryCoefficient_Regions_RegionID",
-                table: "CatagoryCoefficient");
+                name: "FK_CategoryCoefficient_Regions_RegionID",
+                table: "CategoryCoefficient");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_CatagoryCoefficient",
-                table: "CatagoryCoefficient");
+                name: "PK_CategoryCoefficient",
+                table: "CategoryCoefficient");
 
             migrationBuilder.RenameTable(
-                name: "CatagoryCoefficient",
-                newName: "CatagoryCoefficients");
+                name: "CategoryCoefficient",
+                newName: "CategoryCoefficients");
 
             migrationBuilder.RenameIndex(
-                name: "IX_CatagoryCoefficient_RegionID",
-                table: "CatagoryCoefficients",
-                newName: "IX_CatagoryCoefficients_RegionID");
+                name: "IX_CategoryCoefficient_RegionID",
+                table: "CategoryCoefficients",
+                newName: "IX_CategoryCoefficients_RegionID");
 
             migrationBuilder.RenameIndex(
-                name: "IX_CatagoryCoefficient_CatagoryTypeID",
-                table: "CatagoryCoefficients",
-                newName: "IX_CatagoryCoefficients_CatagoryTypeID");
+                name: "IX_CategoryCoefficient_CategoryTypeID",
+                table: "CategoryCoefficients",
+                newName: "IX_CategoryCoefficients_CategoryTypeID");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_CatagoryCoefficients",
-                table: "CatagoryCoefficients",
+                name: "PK_CategoryCoefficients",
+                table: "CategoryCoefficients",
                 column: "ID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
-                table: "CatagoryCoefficients",
-                column: "CatagoryTypeID",
-                principalTable: "CatagoryTypes",
+                name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
+                table: "CategoryCoefficients",
+                column: "CategoryTypeID",
+                principalTable: "CategoryTypes",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CatagoryCoefficients_Regions_RegionID",
-                table: "CatagoryCoefficients",
+                name: "FK_CategoryCoefficients_Regions_RegionID",
+                table: "CategoryCoefficients",
                 column: "RegionID",
                 principalTable: "Regions",
                 principalColumn: "ID",
@@ -59,47 +59,47 @@ namespace WaterUseDB.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
-                table: "CatagoryCoefficients");
+                name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
+                table: "CategoryCoefficients");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_CatagoryCoefficients_Regions_RegionID",
-                table: "CatagoryCoefficients");
+                name: "FK_CategoryCoefficients_Regions_RegionID",
+                table: "CategoryCoefficients");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_CatagoryCoefficients",
-                table: "CatagoryCoefficients");
+                name: "PK_CategoryCoefficients",
+                table: "CategoryCoefficients");
 
             migrationBuilder.RenameTable(
-                name: "CatagoryCoefficients",
-                newName: "CatagoryCoefficient");
+                name: "CategoryCoefficients",
+                newName: "CategoryCoefficient");
 
             migrationBuilder.RenameIndex(
-                name: "IX_CatagoryCoefficients_RegionID",
-                table: "CatagoryCoefficient",
-                newName: "IX_CatagoryCoefficient_RegionID");
+                name: "IX_CategoryCoefficients_RegionID",
+                table: "CategoryCoefficient",
+                newName: "IX_CategoryCoefficient_RegionID");
 
             migrationBuilder.RenameIndex(
-                name: "IX_CatagoryCoefficients_CatagoryTypeID",
-                table: "CatagoryCoefficient",
-                newName: "IX_CatagoryCoefficient_CatagoryTypeID");
+                name: "IX_CategoryCoefficients_CategoryTypeID",
+                table: "CategoryCoefficient",
+                newName: "IX_CategoryCoefficient_CategoryTypeID");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_CatagoryCoefficient",
-                table: "CatagoryCoefficient",
+                name: "PK_CategoryCoefficient",
+                table: "CategoryCoefficient",
                 column: "ID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CatagoryCoefficient_CatagoryTypes_CatagoryTypeID",
-                table: "CatagoryCoefficient",
-                column: "CatagoryTypeID",
-                principalTable: "CatagoryTypes",
+                name: "FK_CategoryCoefficient_CategoryTypes_CategoryTypeID",
+                table: "CategoryCoefficient",
+                column: "CategoryTypeID",
+                principalTable: "CategoryTypes",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CatagoryCoefficient_Regions_RegionID",
-                table: "CatagoryCoefficient",
+                name: "FK_CategoryCoefficient_Regions_RegionID",
+                table: "CategoryCoefficient",
                 column: "RegionID",
                 principalTable: "Regions",
                 principalColumn: "ID",

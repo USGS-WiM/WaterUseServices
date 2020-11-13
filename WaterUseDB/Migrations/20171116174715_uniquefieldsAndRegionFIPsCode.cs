@@ -37,8 +37,8 @@ namespace WaterUseDB.Migrations
                 table: "Managers");
 
             migrationBuilder.DropIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes");
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes");
 
             migrationBuilder.AlterColumn<int>(
                 name: "UseTypeID",
@@ -105,8 +105,8 @@ namespace WaterUseDB.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes",
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes",
                 column: "Code",
                 unique: true);
         }
@@ -146,8 +146,8 @@ namespace WaterUseDB.Migrations
                 table: "Managers");
 
             migrationBuilder.DropIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes");
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes");
 
             migrationBuilder.DropColumn(
                 name: "FIPSCode",
@@ -197,8 +197,8 @@ namespace WaterUseDB.Migrations
                 column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatagoryTypes_Code",
-                table: "CatagoryTypes",
+                name: "IX_CategoryTypes_Code",
+                table: "CategoryTypes",
                 column: "Code");
         }
     }

@@ -18,12 +18,12 @@ namespace WaterUseDB.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "1.1.1");
 
-            modelBuilder.Entity("WaterUseDB.Resources.CatagoryCoefficient", b =>
+            modelBuilder.Entity("WaterUseDB.Resources.CategoryCoefficient", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CatagoryTypeID");
+                    b.Property<int>("CategoryTypeID");
 
                     b.Property<string>("Comments");
 
@@ -33,14 +33,14 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CatagoryTypeID");
+                    b.HasIndex("CategoryTypeID");
 
                     b.HasIndex("RegionID");
 
-                    b.ToTable("CatagoryCoefficient");
+                    b.ToTable("CategoryCoefficient");
                 });
 
-            modelBuilder.Entity("WaterUseDB.Resources.CatagoryType", b =>
+            modelBuilder.Entity("WaterUseDB.Resources.CategoryType", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -57,7 +57,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("CatagoryTypes");
+                    b.ToTable("CategoryTypes");
                 });
 
             modelBuilder.Entity("WaterUseDB.Resources.Manager", b =>
@@ -189,7 +189,7 @@ namespace WaterUseDB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("CatagoryTypeID");
+                    b.Property<int?>("CategoryTypeID");
 
                     b.Property<string>("FacilityCode")
                         .IsRequired();
@@ -210,7 +210,7 @@ namespace WaterUseDB.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CatagoryTypeID");
+                    b.HasIndex("CategoryTypeID");
 
                     b.HasIndex("RegionID");
 
@@ -299,15 +299,15 @@ namespace WaterUseDB.Migrations
                     b.ToTable("UnitTypes");
                 });
 
-            modelBuilder.Entity("WaterUseDB.Resources.CatagoryCoefficient", b =>
+            modelBuilder.Entity("WaterUseDB.Resources.CategoryCoefficient", b =>
                 {
-                    b.HasOne("WaterUseDB.Resources.CatagoryType", "CatagoryType")
+                    b.HasOne("WaterUseDB.Resources.CategoryType", "CategoryType")
                         .WithMany()
-                        .HasForeignKey("CatagoryTypeID")
+                        .HasForeignKey("CategoryTypeID")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("WaterUseDB.Resources.Region", "Region")
-                        .WithMany("CatagoryCoefficients")
+                        .WithMany("CategoryCoefficients")
                         .HasForeignKey("RegionID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -351,9 +351,9 @@ namespace WaterUseDB.Migrations
 
             modelBuilder.Entity("WaterUseDB.Resources.Source", b =>
                 {
-                    b.HasOne("WaterUseDB.Resources.CatagoryType", "CatagoryType")
+                    b.HasOne("WaterUseDB.Resources.CategoryType", "CategoryType")
                         .WithMany()
-                        .HasForeignKey("CatagoryTypeID");
+                        .HasForeignKey("CategoryTypeID");
 
                     b.HasOne("WaterUseDB.Resources.Region", "Region")
                         .WithMany("Sources")
