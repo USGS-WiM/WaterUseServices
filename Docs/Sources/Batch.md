@@ -19,7 +19,7 @@ content-length: 576
 	"facilityName": "WELL test # 3,
 	"facilityCode": "abc345",
 	"stationID": "",
-	"catagoryTypeID": 1,
+	"categoryTypeID": 1,
 	"sourceTypeID": 1,
 	"useTypeID": 1,
 	"location": {
@@ -33,7 +33,7 @@ content-length: 576
 	"facilityName": "WELL test #4 ",
 	"facilityCode": "abc123",
 	"stationID": "",
-	"catagoryTypeID": 1,
+	"categoryTypeID": 1,
 	"sourceTypeID": 1,
 	"useTypeID": 1,
 	"location": {
@@ -54,7 +54,7 @@ HTTP/1.1 200 OK
 	"facilityName": "WELL test # 3,
 	"facilityCode": "abc345",
 	"stationID": "",
-	"catagoryTypeID": 1,
+	"categoryTypeID": 1,
 	"sourceTypeID": 1,
 	"useTypeID": 1,
 	"location": {
@@ -69,7 +69,7 @@ HTTP/1.1 200 OK
 	"facilityName": "WELL test #4 ",
 	"facilityCode": "abc123",
 	"stationID": "",
-	"catagoryTypeID": 1,
+	"categoryTypeID": 1,
 	"sourceTypeID": 1,
 	"useTypeID": 1,
 	"location": {
