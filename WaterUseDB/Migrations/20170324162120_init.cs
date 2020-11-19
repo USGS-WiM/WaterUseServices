@@ -10,7 +10,7 @@ namespace WaterUseDB.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "CatagoryTypes",
+                name: "CategoryTypes",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -21,8 +21,8 @@ namespace WaterUseDB.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CatagoryTypes", x => x.ID);
-                    table.UniqueConstraint("AK_CatagoryTypes_Code", x => x.Code);
+                    table.PrimaryKey("PK_CategoryTypes", x => x.ID);
+                    table.UniqueConstraint("AK_CategoryTypes_Code", x => x.Code);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,27 +104,27 @@ namespace WaterUseDB.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CatagoryCoefficient",
+                name: "CategoryCoefficient",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    CatagoryTypeID = table.Column<int>(nullable: false),
+                    CategoryTypeID = table.Column<int>(nullable: false),
                     Comments = table.Column<string>(nullable: true),
                     RegionID = table.Column<int>(nullable: false),
                     Value = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CatagoryCoefficient", x => x.ID);
+                    table.PrimaryKey("PK_CategoryCoefficient", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_CatagoryCoefficient_CatagoryTypes_CatagoryTypeID",
-                        column: x => x.CatagoryTypeID,
-                        principalTable: "CatagoryTypes",
+                        name: "FK_CategoryCoefficient_CategoryTypes_CategoryTypeID",
+                        column: x => x.CategoryTypeID,
+                        principalTable: "CategoryTypes",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CatagoryCoefficient_Regions_RegionID",
+                        name: "FK_CategoryCoefficient_Regions_RegionID",
                         column: x => x.RegionID,
                         principalTable: "Regions",
                         principalColumn: "ID",
@@ -165,7 +165,7 @@ namespace WaterUseDB.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    CatagoryTypeID = table.Column<int>(nullable: false),
+                    CategoryTypeID = table.Column<int>(nullable: false),
                     FacilityName = table.Column<string>(nullable: false),
                     RegionID = table.Column<int>(nullable: false),
                     SourceTypeID = table.Column<int>(nullable: false),
@@ -175,9 +175,9 @@ namespace WaterUseDB.Migrations
                 {
                     table.PrimaryKey("PK_Sources", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Sources_CatagoryTypes_CatagoryTypeID",
-                        column: x => x.CatagoryTypeID,
-                        principalTable: "CatagoryTypes",
+                        name: "FK_Sources_CategoryTypes_CategoryTypeID",
+                        column: x => x.CategoryTypeID,
+                        principalTable: "CategoryTypes",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -284,13 +284,13 @@ namespace WaterUseDB.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatagoryCoefficient_CatagoryTypeID",
-                table: "CatagoryCoefficient",
-                column: "CatagoryTypeID");
+                name: "IX_CategoryCoefficient_CategoryTypeID",
+                table: "CategoryCoefficient",
+                column: "CategoryTypeID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatagoryCoefficient_RegionID",
-                table: "CatagoryCoefficient",
+                name: "IX_CategoryCoefficient_RegionID",
+                table: "CategoryCoefficient",
                 column: "RegionID");
 
             migrationBuilder.CreateIndex(
@@ -319,9 +319,9 @@ namespace WaterUseDB.Migrations
                 column: "RegionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sources_CatagoryTypeID",
+                name: "IX_Sources_CategoryTypeID",
                 table: "Sources",
-                column: "CatagoryTypeID");
+                column: "CategoryTypeID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sources_RegionID",
@@ -347,7 +347,7 @@ namespace WaterUseDB.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CatagoryCoefficient");
+                name: "CategoryCoefficient");
 
             migrationBuilder.DropTable(
                 name: "Permits");
@@ -374,7 +374,7 @@ namespace WaterUseDB.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "CatagoryTypes");
+                name: "CategoryTypes");
 
             migrationBuilder.DropTable(
                 name: "Regions");

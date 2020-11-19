@@ -4,13 +4,13 @@
     CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
 );
 
-CREATE TABLE "CatagoryTypes" (
+CREATE TABLE "CategoryTypes" (
     "ID" serial NOT NULL,
     "Code" text NOT NULL,
     "Description" text,
     "Name" text NOT NULL,
-    CONSTRAINT "PK_CatagoryTypes" PRIMARY KEY ("ID"),
-    CONSTRAINT "AK_CatagoryTypes_Code" UNIQUE ("Code")
+    CONSTRAINT "PK_CategoryTypes" PRIMARY KEY ("ID"),
+    CONSTRAINT "AK_CategoryTypes_Code" UNIQUE ("Code")
 );
 
 CREATE TABLE "Regions" (
@@ -56,15 +56,15 @@ CREATE TABLE "UnitTypes" (
     CONSTRAINT "AK_UnitTypes_Abbreviation" UNIQUE ("Abbreviation")
 );
 
-CREATE TABLE "CatagoryCoefficient" (
+CREATE TABLE "CategoryCoefficient" (
     "ID" serial NOT NULL,
-    "CatagoryTypeID" int4 NOT NULL,
+    "CategoryTypeID" int4 NOT NULL,
     "Comments" text,
     "RegionID" int4 NOT NULL,
     "Value" float8 NOT NULL,
-    CONSTRAINT "PK_CatagoryCoefficient" PRIMARY KEY ("ID"),
-    CONSTRAINT "FK_CatagoryCoefficient_CatagoryTypes_CatagoryTypeID" FOREIGN KEY ("CatagoryTypeID") REFERENCES "CatagoryTypes" ("ID") ON DELETE CASCADE,
-    CONSTRAINT "FK_CatagoryCoefficient_Regions_RegionID" FOREIGN KEY ("RegionID") REFERENCES "Regions" ("ID") ON DELETE CASCADE
+    CONSTRAINT "PK_CategoryCoefficient" PRIMARY KEY ("ID"),
+    CONSTRAINT "FK_CategoryCoefficient_CategoryTypes_CategoryTypeID" FOREIGN KEY ("CategoryTypeID") REFERENCES "CategoryTypes" ("ID") ON DELETE CASCADE,
+    CONSTRAINT "FK_CategoryCoefficient_Regions_RegionID" FOREIGN KEY ("RegionID") REFERENCES "Regions" ("ID") ON DELETE CASCADE
 );
 
 CREATE TABLE "Managers" (
@@ -85,13 +85,13 @@ CREATE TABLE "Managers" (
 
 CREATE TABLE "Sources" (
     "ID" serial NOT NULL,
-    "CatagoryTypeID" int4 NOT NULL,
+    "CategoryTypeID" int4 NOT NULL,
     "FacilityName" text NOT NULL,
     "RegionID" int4 NOT NULL,
     "SourceTypeID" int4 NOT NULL,
     "StationID" text,
     CONSTRAINT "PK_Sources" PRIMARY KEY ("ID"),
-    CONSTRAINT "FK_Sources_CatagoryTypes_CatagoryTypeID" FOREIGN KEY ("CatagoryTypeID") REFERENCES "CatagoryTypes" ("ID") ON DELETE CASCADE,
+    CONSTRAINT "FK_Sources_CategoryTypes_CategoryTypeID" FOREIGN KEY ("CategoryTypeID") REFERENCES "CategoryTypes" ("ID") ON DELETE CASCADE,
     CONSTRAINT "FK_Sources_Regions_RegionID" FOREIGN KEY ("RegionID") REFERENCES "Regions" ("ID") ON DELETE CASCADE,
     CONSTRAINT "FK_Sources_SourceTypes_SourceTypeID" FOREIGN KEY ("SourceTypeID") REFERENCES "SourceTypes" ("ID") ON DELETE CASCADE
 );
@@ -130,9 +130,9 @@ CREATE TABLE "TimeSeries" (
     CONSTRAINT "FK_TimeSeries_UnitTypes_UnitTypeID" FOREIGN KEY ("UnitTypeID") REFERENCES "UnitTypes" ("ID") ON DELETE CASCADE
 );
 
-CREATE INDEX "IX_CatagoryCoefficient_CatagoryTypeID" ON "CatagoryCoefficient" ("CatagoryTypeID");
+CREATE INDEX "IX_CategoryCoefficient_CategoryTypeID" ON "CategoryCoefficient" ("CategoryTypeID");
 
-CREATE INDEX "IX_CatagoryCoefficient_RegionID" ON "CatagoryCoefficient" ("RegionID");
+CREATE INDEX "IX_CategoryCoefficient_RegionID" ON "CategoryCoefficient" ("RegionID");
 
 CREATE INDEX "IX_Managers_RoleID" ON "Managers" ("RoleID");
 
@@ -144,7 +144,7 @@ CREATE INDEX "IX_Permits_UnitTypeID" ON "Permits" ("UnitTypeID");
 
 CREATE INDEX "IX_RegionManager_RegionID" ON "RegionManager" ("RegionID");
 
-CREATE INDEX "IX_Sources_CatagoryTypeID" ON "Sources" ("CatagoryTypeID");
+CREATE INDEX "IX_Sources_CategoryTypeID" ON "Sources" ("CategoryTypeID");
 
 CREATE INDEX "IX_Sources_RegionID" ON "Sources" ("RegionID");
 

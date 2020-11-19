@@ -29,8 +29,8 @@ namespace WaterUseDB
 {
     public class WaterUseDBContext:DbContext
     {
-        public DbSet<CatagoryType> CatagoryTypes { get; set; }
-        public DbSet<CatagoryCoefficient> CatagoryCoefficients { get; set; }
+        public DbSet<CategoryType> CategoryTypes { get; set; }
+        public DbSet<CategoryCoefficient> CategoryCoefficients { get; set; }
         public DbSet<Manager> Managers { get; set; }
         public DbSet<Permit> Permits { get; set; }
         public DbSet<Region> Regions { get; set; }
@@ -60,7 +60,7 @@ namespace WaterUseDB
             modelBuilder.Entity<Role>().HasIndex(k => k.Name).IsUnique();
             modelBuilder.Entity<Manager>().HasIndex(k => k.Username).IsUnique();
             modelBuilder.Entity<Region>().HasIndex(k => k.ShortName).IsUnique();
-            modelBuilder.Entity<CatagoryType>().HasIndex(k => k.Code).IsUnique();
+            modelBuilder.Entity<CategoryType>().HasIndex(k => k.Code).IsUnique();
             modelBuilder.Entity<UnitType>().HasIndex(k => k.Abbreviation).IsUnique();
             modelBuilder.Entity<StatusType>().HasIndex(k => k.Code).IsUnique();
             modelBuilder.Entity<Source>().HasIndex(k => k.FacilityCode).IsUnique();
@@ -72,11 +72,11 @@ namespace WaterUseDB
             }//next entitytype
 
             //cascade delete is default, rewrite behavior
-            modelBuilder.Entity("WaterUseDB.Resources.CatagoryCoefficient", b =>
+            modelBuilder.Entity("WaterUseDB.Resources.CategoryCoefficient", b =>
             {
-                b.HasOne("WaterUseDB.Resources.CatagoryType", "CatagoryType")
+                b.HasOne("WaterUseDB.Resources.CategoryType", "CategoryType")
                     .WithMany()
-                    .HasForeignKey("CatagoryTypeID")
+                    .HasForeignKey("CategoryTypeID")
                     .OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity("WaterUseDB.Resources.Manager", b =>

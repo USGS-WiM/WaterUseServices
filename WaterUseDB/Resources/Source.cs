@@ -37,7 +37,7 @@ namespace WaterUseDB.Resources
 
         public string StationID { get; set; }
 
-        public int? CatagoryTypeID { get; set; }
+        public int? CategoryTypeID { get; set; }
         [Required]
         public int SourceTypeID { get; set; }
         [Required]
@@ -49,7 +49,7 @@ namespace WaterUseDB.Resources
 
 
         public Region Region { get; set; }
-        public CatagoryType CatagoryType { get; set; }
+        public CategoryType CategoryType { get; set; }
         public SourceType SourceType { get; set; }
         public UseType UseType { get; set; }
         public List<Permit> Permits { get; set; }
