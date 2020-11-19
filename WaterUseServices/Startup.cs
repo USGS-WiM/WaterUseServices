@@ -60,14 +60,13 @@ namespace WaterUseServices
                 options.DefaultAuthenticateScheme = BasicDefaults.AuthenticationScheme;
             }).AddBasicAuthentication();
 
+            services.AddAuthorization(options => loadAutorizationPolicies(options));
             services.AddCors(options => {
                 options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
                                                                  .AllowAnyMethod()
                                                                  .AllowAnyHeader()
                                                                  .AllowCredentials());
             });
-            services.AddAuthorization(options => loadAutorizationPolicies(options));
-            
             services.AddMvc(options =>
             {
                 options.RespectBrowserAcceptHeader = true;

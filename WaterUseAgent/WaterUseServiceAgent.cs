@@ -88,7 +88,7 @@ namespace WaterUseAgent
                 return new Configuration()
                             {
                                 HasPermits = sourcequery.Any(s => s.Permits.Count > 0),
-                                CanComputeReturns = Select<CategoryCoefficient>().Any(cc => cc.RegionID == regionID),
+                                CanComputeReturns = Select<CatagoryCoefficient>().Any(cc => cc.RegionID == regionID),
                                 MaxYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Max().Year,
                                 MinYear = sourcequery.Include(s => s.TimeSeries).SelectMany(s => s.TimeSeries.Select(t => t.Date)).Min().Year,
                                 Units = "MGD"
@@ -375,7 +375,7 @@ namespace WaterUseAgent
             try
             {
                 if (IncludePermittedWithdrawals) sources = sources.Include(s => s.Permits).Include("Permits.UnitType");
-                sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CategoryType).Include(s=>s.UseType).ToList();
+                sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).Include(s=>s.UseType).ToList();
                 
                 return new Wateruse()
                 {                    
@@ -399,7 +399,7 @@ namespace WaterUseAgent
                     Dictionary<string, Wateruse> result = new Dictionary<string, Wateruse>();
                     try
                     {
-                        sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CategoryType).Include(s => s.UseType).ToList();
+                        sourceList = sources.Include(s => s.SourceType).Include("TimeSeries.UnitType").Include(s => s.CatagoryType).Include(s => s.UseType).ToList();
                         foreach (var item in sourceList)
                         {
                             var wu = new Wateruse()
@@ -466,11 +466,11 @@ namespace WaterUseAgent
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value/ mval.Select(x => x.Date.Year).Distinct().Count())
                         }),
-                        Code = mval.Any(i => i.Source.CategoryType != null) ? mval.Where(cd=>cd.Source.CategoryType != null).GroupBy(cd => cd.Source.CategoryType.Code)
+                        Code = mval.Any(i => i.Source.CatagoryType != null) ? mval.Where(cd=>cd.Source.CatagoryType != null).GroupBy(cd => cd.Source.CatagoryType.Code)
                         .ToDictionary(ky => ky.Key, cval => new WateruseValue()
                         {
-                            Name = cval.First().Source.CategoryType.Name,
-                            Description = "Daily " + cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " average " + cval.First().Source.CategoryType.Name,
+                            Name = cval.First().Source.CatagoryType.Name,
+                            Description = "Daily " + cval.First().Date.ToString("MMM", CultureInfo.InvariantCulture) + " average " + cval.First().Source.CatagoryType.Name,
                             Unit = cval.First().UnitType,
                             Value = cval.Sum(ts => ts.Value/ mval.Select(x => x.Date.Year).Distinct().Count())
                         }) : null
@@ -503,16 +503,15 @@ namespace WaterUseAgent
 
         private WateruseSummary computeWaterUseSummaryReturns(List<Source> sources, int startyear, int? endyear)
         {
-            List<NetTimeSeries> tslist = null;
-            Int32 yrspan = 1;
-            List<CategoryCoefficient> catCoeff = null;
+            List<NetTimeSeries> tslist = null;            
+            List<CatagoryCoefficient> catCoeff = null;
 
             try
             {
                 if (sources.Count() < 1) return null;
 
                 if (!endyear.HasValue) endyear = startyear;
-                catCoeff = Select<CategoryCoefficient>().ToList();
+                catCoeff = Select<CatagoryCoefficient>().ToList();
 
                 tslist = sources.Where(i => catCoeff.Select(ct => ct.RegionID).Contains(i.RegionID)).SelectMany(s => s.TimeSeries).Where(ts => ts.Date.Year >= startyear && ts.Date.Year <= endyear.Value)
                     .Select(ts=>new NetTimeSeries() {
@@ -522,7 +521,7 @@ namespace WaterUseAgent
                          Source = ts.Source,
                          UnitTypeID = ts.UnitTypeID ,
                          UnitType = ts.UnitType,
-                         multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CategoryCoefficient() { Value=0 }).FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CategoryTypeID == ts.Source.CategoryTypeID).Value,
+                         multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CatagoryCoefficient() { Value=0 }).FirstOrDefault(ct=>ct.RegionID == ts.Source.RegionID && ct.CatagoryTypeID == ts.Source.CatagoryTypeID).Value,
                          Value =ts.Value
                     }).ToList();
 
@@ -537,7 +536,7 @@ namespace WaterUseAgent
                         Source = ts.Source,
                         UnitTypeID = ts.UnitTypeID,
                         UnitType = ts.UnitType,
-                        multiplier = ts.Value*catCoeff.Where(ct => ct.CategoryTypeID == 4).Average(s => s.Value),
+                        multiplier = ts.Value*catCoeff.DefaultIfEmpty(new CatagoryCoefficient() { Value = 0 }).FirstOrDefault(ct => ct.CatagoryTypeID == 4).Value,
                         Value = ts.Value
                     }));
                 }
@@ -596,7 +595,7 @@ namespace WaterUseAgent
                         {
                             Date = new DateTime(i, r, 1),
                             UnitType = new UnitType() { Abbreviation = "MGD", Name = "Million Gallons per Day" },
-                            Source = new Source() { UseType = new UseType() { Name= "Withdrawal" }, SourceType = new SourceType() { Code = "GW" }, CategoryType = new CategoryType() { Code = "DO", Name = "Domestic" } },
+                            Source = new Source() { UseType = new UseType() { Name= "Withdrawal" }, SourceType = new SourceType() { Code = "GW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
                             Value = DomesticUse.GroundWater.Value
                         }));
 
@@ -605,7 +604,7 @@ namespace WaterUseAgent
                         {
                             Date = new DateTime(i, r, 1),
                             UnitType = new UnitType() { ID = 1, Abbreviation = "MGD", Name = "Million Gallons per Day" },
-                            Source = new Source() { UseType = new UseType() { Name = "Withdrawal" }, SourceType = new SourceType() { Code = "SW" }, CategoryType = new CategoryType() { Code = "DO", Name = "Domestic" } },
+                            Source = new Source() { UseType = new UseType() { Name = "Withdrawal" }, SourceType = new SourceType() { Code = "SW" }, CatagoryType = new CatagoryType() { Code = "DO", Name = "Domestic" } },
                             Value = DomesticUse.SurfaceWater.Value
                         }));
 

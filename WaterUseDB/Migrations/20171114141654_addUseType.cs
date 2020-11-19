@@ -10,8 +10,8 @@ namespace WaterUseDB.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             //migrationBuilder.DropForeignKey(
-            //    name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
-            //    table: "CategoryCoefficients");
+            //    name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
+            //    table: "CatagoryCoefficients");
 
             //migrationBuilder.DropForeignKey(
             //    name: "FK_Managers_Roles_RoleID",
@@ -74,10 +74,10 @@ namespace WaterUseDB.Migrations
             //    column: "Code");
 
             //migrationBuilder.AddForeignKey(
-            //    name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
-            //    table: "CategoryCoefficients",
-            //    column: "CategoryTypeID",
-            //    principalTable: "CategoryTypes",
+            //    name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
+            //    table: "CatagoryCoefficients",
+            //    column: "CatagoryTypeID",
+            //    principalTable: "CatagoryTypes",
             //    principalColumn: "ID",
             //    onDelete: ReferentialAction.Restrict);
 
@@ -125,8 +125,8 @@ namespace WaterUseDB.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
-                table: "CategoryCoefficients");
+                name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
+                table: "CatagoryCoefficients");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Managers_Roles_RoleID",
@@ -160,10 +160,10 @@ namespace WaterUseDB.Migrations
                 table: "Sources");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CategoryCoefficients_CategoryTypes_CategoryTypeID",
-                table: "CategoryCoefficients",
-                column: "CategoryTypeID",
-                principalTable: "CategoryTypes",
+                name: "FK_CatagoryCoefficients_CatagoryTypes_CatagoryTypeID",
+                table: "CatagoryCoefficients",
+                column: "CatagoryTypeID",
+                principalTable: "CatagoryTypes",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 

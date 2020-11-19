@@ -17,7 +17,7 @@ namespace WaterUseDB.Migrations
                 table: "Permits");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Sources_CategoryTypes_CategoryTypeID",
+                name: "FK_Sources_CatagoryTypes_CatagoryTypeID",
                 table: "Sources");
 
             migrationBuilder.AlterColumn<string>(
@@ -49,7 +49,7 @@ namespace WaterUseDB.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
-                name: "CategoryTypeID",
+                name: "CatagoryTypeID",
                 table: "Sources",
                 nullable: true,
                 oldClrType: typeof(int));
@@ -120,10 +120,10 @@ namespace WaterUseDB.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Sources_CategoryTypes_CategoryTypeID",
+                name: "FK_Sources_CatagoryTypes_CatagoryTypeID",
                 table: "Sources",
-                column: "CategoryTypeID",
-                principalTable: "CategoryTypes",
+                column: "CatagoryTypeID",
+                principalTable: "CatagoryTypes",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -139,7 +139,7 @@ namespace WaterUseDB.Migrations
                 table: "Permits");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Sources_CategoryTypes_CategoryTypeID",
+                name: "FK_Sources_CatagoryTypes_CatagoryTypeID",
                 table: "Sources");
 
             migrationBuilder.DropColumn(
@@ -171,7 +171,7 @@ namespace WaterUseDB.Migrations
                 oldClrType: typeof(string));
 
             migrationBuilder.AlterColumn<int>(
-                name: "CategoryTypeID",
+                name: "CatagoryTypeID",
                 table: "Sources",
                 nullable: false,
                 oldClrType: typeof(int),
@@ -242,10 +242,10 @@ namespace WaterUseDB.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Sources_CategoryTypes_CategoryTypeID",
+                name: "FK_Sources_CatagoryTypes_CatagoryTypeID",
                 table: "Sources",
-                column: "CategoryTypeID",
-                principalTable: "CategoryTypes",
+                column: "CatagoryTypeID",
+                principalTable: "CatagoryTypes",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Cascade);
         }

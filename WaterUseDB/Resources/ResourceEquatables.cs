@@ -29,28 +29,28 @@ using System.Text;
 
 namespace WaterUseDB.Resources
 {
-    public partial class CategoryCoefficient : IEquatable<CategoryCoefficient>
+    public partial class CatagoryCoefficient : IEquatable<CatagoryCoefficient>
     {
-        public bool Equals(CategoryCoefficient other)
+        public bool Equals(CatagoryCoefficient other)
         {
-            return this.CategoryTypeID == other.CategoryTypeID && this.RegionID == other.RegionID;
+            return this.CatagoryTypeID == other.CatagoryTypeID && this.RegionID == other.RegionID;
         }
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals(obj as CategoryCoefficient);
+            return Equals(obj as CatagoryCoefficient);
         }
         public override int GetHashCode()
         {
-            return (this.CategoryTypeID + this.RegionID).GetHashCode();
+            return (this.CatagoryTypeID + this.RegionID).GetHashCode();
         }
     }//end 
 
-    public partial class CategoryType : IEquatable<CategoryType>
+    public partial class CatagoryType : IEquatable<CatagoryType>
     {
-        public bool Equals(CategoryType other)
+        public bool Equals(CatagoryType other)
         {
             return String.Equals(this.Name.ToLower(),other.Name.ToLower()) && String.Equals(this.Code.ToLower(), other.Code.ToLower());
         }
@@ -59,7 +59,7 @@ namespace WaterUseDB.Resources
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals(obj as CategoryType);
+            return Equals(obj as CatagoryType);
         }
         public override int GetHashCode()
         {

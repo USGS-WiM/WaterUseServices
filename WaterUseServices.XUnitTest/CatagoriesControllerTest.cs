@@ -42,11 +42,11 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<EnumerableQuery<CategoryType>>(okResult.Value);
+            var result = Assert.IsType<EnumerableQuery<CatagoryType>>(okResult.Value);
 
             Assert.Equal(2, result.Count());
-            Assert.Equal("MockTestCategory2", result.LastOrDefault().Name);
-            Assert.Equal("test mock Category 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestCatagory2", result.LastOrDefault().Name);
+            Assert.Equal("test mock catagory 2", result.LastOrDefault().Description);
         }
 
         [Fact]
@@ -60,17 +60,17 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<CategoryType>(okResult.Value);
+            var result = Assert.IsType<CatagoryType>(okResult.Value);
             
-            Assert.Equal("MockTestCategory1", result.Name);
-            Assert.Equal("test mock Category 1", result.Description);
+            Assert.Equal("MockTestCatagory1", result.Name);
+            Assert.Equal("test mock catagory 1", result.Description);
         }
 
         [Fact]
         public async Task Post()
         {
             //Arrange
-            var entity = new CategoryType() {Name = "newCategory", Description = "New mock Category 3" };
+            var entity = new CatagoryType() {Name = "newCatagory", Description = "New mock catagory 3" };
    
 
             //Act
@@ -91,7 +91,7 @@ namespace WaterUseServices.XUnitTest
             //Arrange
             var get = await controller.Get(1);
             var okgetResult = Assert.IsType<OkObjectResult>(get);
-            var entity = Assert.IsType<CategoryType>(okgetResult.Value);
+            var entity = Assert.IsType<CatagoryType>(okgetResult.Value);
 
             entity.Name = "editedName";
 
@@ -100,7 +100,7 @@ namespace WaterUseServices.XUnitTest
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(response);
-            var result = Assert.IsType<CategoryType>(okResult.Value);
+            var result = Assert.IsType<CatagoryType>(okResult.Value);
 
             Assert.Equal(entity.Name, result.Name);
             Assert.Equal(entity.Description, result.Description);
@@ -120,8 +120,8 @@ namespace WaterUseServices.XUnitTest
             var result = Assert.IsType<EnumerableQuery<Role>>(okResult.Value);
 
             Assert.Equal(1, result.Count());
-            Assert.Equal("MockTestCategory2", result.LastOrDefault().Name);
-            Assert.Equal("test mock Category 2", result.LastOrDefault().Description);
+            Assert.Equal("MockTestCatagory2", result.LastOrDefault().Name);
+            Assert.Equal("test mock catagory 2", result.LastOrDefault().Description);
         }
     }
     

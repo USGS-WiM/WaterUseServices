@@ -39,7 +39,7 @@ namespace WaterUseServices.Controllers
         {
             try
             {
-                return Ok(agent.Select<CategoryType>());
+                return Ok(agent.Select<CatagoryType>());
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace WaterUseServices.Controllers
             {
                 if (id < 0) return new BadRequestResult(); // This returns HTTP 404
 
-                return Ok(await agent.Find<CategoryType>(id));
+                return Ok(await agent.Find<CatagoryType>(id));
             }
             catch (Exception ex)
             {
@@ -64,12 +64,12 @@ namespace WaterUseServices.Controllers
         }
         
         [HttpPost][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Post([FromBody]CategoryType entity)
+        public async Task<IActionResult> Post([FromBody]CatagoryType entity)
         {
             try
             {
                 if (! isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(await agent.Add<CategoryType>(entity));
+                return Ok(await agent.Add<CatagoryType>(entity));
             }
             catch (Exception ex)
             {
@@ -79,13 +79,13 @@ namespace WaterUseServices.Controllers
 
         [HttpPost][Authorize(Policy = "AdminOnly")]
         [Route("Batch")]
-        public async Task<IActionResult> Batch([FromBody]List<CategoryType> entities)
+        public async Task<IActionResult> Batch([FromBody]List<CatagoryType> entities)
         {
             try
             {
                 if (!isValid(entities)) return new BadRequestObjectResult("Object is invalid");
 
-                return Ok(await agent.Add<CategoryType>(entities));
+                return Ok(await agent.Add<CatagoryType>(entities));
             }
             catch (Exception ex)
             {
@@ -94,12 +94,12 @@ namespace WaterUseServices.Controllers
         }
 
         [HttpPut("{id}")][Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> Put(int id, [FromBody]CategoryType entity)
+        public async Task<IActionResult> Put(int id, [FromBody]CatagoryType entity)
         {
             try
             {
                 if (id <0 || !isValid(entity)) return new BadRequestResult(); // This returns HTTP 404
-                return Ok(await agent.Update<CategoryType>(id, entity));
+                return Ok(await agent.Update<CatagoryType>(id, entity));
             }
             catch (Exception ex)
             {
@@ -114,10 +114,10 @@ namespace WaterUseServices.Controllers
             try
             {
                 if (id < 1) return new BadRequestResult();
-                var entity = await agent.Find<CategoryType>(id);
+                var entity = await agent.Find<CatagoryType>(id);
                 if (entity == null) return new NotFoundResult();
 
-                await agent.Delete<CategoryType>(entity);
+                await agent.Delete<CatagoryType>(entity);
 
                 return Ok();
 
