@@ -480,14 +480,14 @@ namespace WaterUseAgent
                         { "Well", new WateruseValue(){
                                         Name = "Permitted " + pmtlist.First().Source.SourceType.Name,
                                         Description = "Daily Annual Average Permitted" + pmtlist.First().Source.SourceType.Description,
-                                        Value = pmtlist.Where(p=>p.WellCapacity.HasValue).Sum(p => p.WellCapacity.Value * DateTime.DaysInMonth(p.StartDate.Value.Year, p.StartDate.Value.Month) / getDaysInYear(p.StartDate.Value.Year)),
+                                        Value = pmtlist.Where(p=>p.WellCapacity.HasValue).Sum(p => p.WellCapacity.Value),
                                         Unit = pmtlist.First().UnitType
                                     }
                         },
                         { "Intake",new WateruseValue(){
                                         Name = "Permitted " + pmtlist.First().Source.SourceType.Name,
                                         Description = "Daily Annual Average Permitted" + pmtlist.First().Source.SourceType.Description,
-                                        Value = pmtlist.Where(p => p.IntakeCapacity.HasValue).Sum(p => p.IntakeCapacity.Value * DateTime.DaysInMonth(p.StartDate.Value.Year, p.StartDate.Value.Month) / getDaysInYear(p.StartDate.Value.Year)),
+                                        Value = pmtlist.Where(p => p.IntakeCapacity.HasValue).Sum(p => p.IntakeCapacity.Value),
                                         Unit = pmtlist.First().UnitType
                                     }
                         }
