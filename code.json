@@ -3,9 +3,9 @@
     "name": "WaerUseServices",
     "organization": "U.S. Geological Survey",
     "description": "StreamStats custom REST Wateruse services",
-    "version": "V1.1.0",
+    "version": "v0.0.0",
     "statusOptionsURL":"https://github.com/GSA/code-gov-web/blob/master/src/assets/schemas/2.0.0.json#L144-L152",
-	"status": "Production",	
+	"status": "preliminary",	
 
     "permissions": {
       "usageType": "openSource",
@@ -17,7 +17,7 @@
       ]
     },
 
-    "homepageURL": "https://streamstats.usgs.gov",
+    "homepageURL": "https://wim.usgs.gov",
     "downloadURL": "https://github.com/USGS-WiM/WaerUseServices/archive/master.zip",
     "disclaimerURL": "https://github.com/USGS-WiM/WaerUseServices/blob/master/DISCLAIMER.md",
     "repositoryUrl": "https://github.com/USGS-WiM/WaerUseServices",
@@ -26,11 +26,10 @@
     "laborHours": null,
 
     "tags": [
-      "streamstats",
+      "Streamstats",
       "Services",
 	  "REST",
-	  "Wateruse",
-	  "PostgreSQL"
+	  "Wateruse"
     ],
 
     "languages": [
@@ -43,7 +42,7 @@
     },
 
     "date": {
-      "metadataLastUpdated": "2019-04-19"
+      "metadataLastUpdated": "2017-10-25"
     }
   }
 ]
